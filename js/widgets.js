@@ -200,41 +200,4 @@
         li('**D. 能發動,但一放油門就熄火** → 怠速與進氣',
           li('節氣門積碳、怠速控制、進氣漏氣、燃油壓力')))));
   };
-
-  /* ================= 機車側視圖(零件地圖用) ================= */
-  W.scooterSVG = function (mode, selectedId) {
-    const parts = APP.data.parts.filter((p) => p.mode === 'both' || p.mode === mode);
-    const ice = mode === 'ice';
-    const engine = ice
-      ? `<rect class="metal" x="384" y="236" width="132" height="50" rx="22"/>
-         <path class="metal" d="M394 244 L384 214 L420 208 L428 244 Z"/>
-         <circle cx="470" cy="262" r="22" class="body"/><circle cx="470" cy="262" r="8" class="metal"/>
-         <path d="M410 286 C430 300 470 302 520 298" fill="none" stroke="var(--svg-metal)" stroke-width="12" stroke-linecap="round"/>
-         <rect class="metal" x="486" y="288" width="100" height="20" rx="10"/>
-         <rect class="body" x="440" y="190" width="32" height="22" rx="5"/>
-         <rect class="body" x="300" y="190" width="56" height="34" rx="6"/>`
-      : `<circle cx="535" cy="250" r="30" class="metal"/><circle cx="535" cy="250" r="10" fill="var(--svg-line)"/>
-         <rect x="262" y="250" width="100" height="36" rx="7" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/>
-         <rect class="body" x="396" y="194" width="52" height="28" rx="5"/>`;
-    const dots = parts.map((p, i) =>
-      `<g class="hot${p.id === selectedId ? ' sel' : ''}" data-id="${p.id}" transform="translate(${p.x},${p.y})"><circle class="dot" r="10"/><text text-anchor="middle" y="4">${i + 1}</text></g>`).join('');
-    return `<svg class="wsvg" viewBox="0 0 640 330" role="img" aria-label="機車零件位置圖">
-      <line class="ln" x1="20" y1="312" x2="620" y2="312" stroke-dasharray="4 7"/>
-      <circle cx="118" cy="250" r="58" fill="#3a3d42" stroke="var(--svg-line)" stroke-width="3"/>
-      <circle cx="118" cy="250" r="38" class="metal"/><circle cx="118" cy="250" r="22" fill="none" stroke="var(--svg-line)" stroke-width="3"/>
-      <rect x="130" y="262" width="22" height="12" rx="3" fill="var(--svg-line)"/>
-      <circle cx="535" cy="250" r="58" fill="#3a3d42" stroke="var(--svg-line)" stroke-width="3"/>
-      <circle cx="535" cy="250" r="38" class="metal"/><circle cx="535" cy="250" r="9" fill="var(--svg-line)"/>
-      <line x1="118" y1="250" x2="165" y2="95" stroke="var(--svg-metal)" stroke-width="9" stroke-linecap="round"/>
-      <path class="ln" stroke-width="7" stroke-linecap="round" d="M165 95 L195 70 L240 78"/>
-      <path class="body" d="M160 96 C195 100 222 150 232 232 L262 232 C258 160 235 100 200 80 Z"/>
-      <ellipse cx="140" cy="108" rx="16" ry="20" fill="#ffe9a8" stroke="var(--svg-line)" stroke-width="2"/>
-      <rect class="body" x="232" y="232" width="130" height="18" rx="9"/>
-      <path class="body" d="M330 190 C338 152 430 140 505 146 C555 150 590 168 588 200 C586 214 570 216 556 214 L430 222 L372 238 C352 238 336 218 330 190 Z"/>
-      <line x1="548" y1="240" x2="562" y2="176" stroke="var(--svg-metal)" stroke-width="8" stroke-linecap="round"/>
-      <path class="ln" d="M330 300 L352 312" stroke-width="5"/>
-      ${engine}
-      ${dots}
-    </svg>`;
-  };
 })();

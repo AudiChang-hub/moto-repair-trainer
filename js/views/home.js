@@ -44,34 +44,6 @@
 
   function pct(done, total) { return total ? Math.round((done / total) * 100) : 0; }
 
-  // 主視覺插畫:藍圖風格的速克達,線條會「畫」出來,面板再淡入
-  function heroArt() {
-    const pop = (x, y, lx, ly, label, d) => `<g class="pop" style="animation-delay:${d}s"><path d="M${x} ${y} L${lx} ${ly + 10}" stroke="var(--accent-hi)" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/><circle cx="${x}" cy="${y}" r="5.5" fill="var(--accent-hi)"/><circle cx="${x}" cy="${y}" r="11" fill="none" stroke="var(--accent-hi)" stroke-opacity=".35" stroke-width="2"/><rect x="${lx - label.length * 8 - 10}" y="${ly - 16}" width="${label.length * 16 + 20}" height="28" rx="9" fill="var(--text)"/><text x="${lx}" y="${ly + 3}" text-anchor="middle" fill="var(--bg)" font-size="14" font-weight="700">${label}</text></g>`;
-    const wheel = (cx) => `<circle class="draw" cx="${cx}" cy="274" r="52" fill="none" stroke="var(--text)" stroke-width="9"/><circle class="draw" cx="${cx}" cy="274" r="36" fill="var(--card)" stroke="var(--text)" stroke-width="2"/><g class="spin"><path d="M${cx} 244v60M${cx - 30} 274h60M${cx - 21} 253l42 42M${cx + 21} 253l-42 42" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/></g><circle cx="${cx}" cy="274" r="9" fill="var(--text)"/>`;
-    return `<svg class="hero-art" viewBox="0 0 520 360" role="img" aria-label="速克達線稿插圖,標示碟煞、火星塞與 CVT 的位置">
-      <defs><linearGradient id="hpanel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--card)"/><stop offset="1" stop-color="var(--bg2)"/></linearGradient></defs>
-      <path d="M36 328H496" stroke="var(--border2)" stroke-width="2" stroke-dasharray="2 9" fill="none"/>
-      <g stroke-linecap="round" stroke-linejoin="round">
-        ${wheel(128)}${wheel(398)}
-        <path class="draw" d="M128 274 L176 106" stroke="var(--text)" stroke-width="8" fill="none"/>
-        <path class="draw" d="M176 106 L196 86 L240 90" stroke="var(--text)" stroke-width="6" fill="none"/>
-        <path class="draw" d="M430 254 L452 206" stroke="var(--muted)" stroke-width="7" fill="none"/>
-        <path class="draw fillin" d="M330 246 H420 Q440 246 440 266 V276 Q440 294 420 294 H352 Q330 294 330 272 Z" fill="url(#hpanel)" stroke="var(--text)" stroke-width="2.5"/>
-        <circle class="draw" cx="372" cy="270" r="15" fill="none" stroke="var(--text)" stroke-width="2"/>
-        <path class="draw" d="M344 300 C388 314 434 312 470 294" stroke="var(--muted)" stroke-width="6" fill="none"/>
-        <path class="draw fillin" d="M170 104 C190 98 204 108 210 122 C228 162 238 204 242 244 L218 248 C212 204 198 160 176 128 Z" fill="url(#hpanel)" stroke="var(--text)" stroke-width="3"/>
-        <path class="draw fillin" d="M218 240 H336 Q344 240 344 248 Q344 256 336 256 H218 Z" fill="url(#hpanel)" stroke="var(--text)" stroke-width="3"/>
-        <path class="draw fillin" d="M326 252 C318 222 330 196 362 188 L472 180 C494 180 506 200 496 220 C488 238 468 248 440 250 Z" fill="url(#hpanel)" stroke="var(--text)" stroke-width="3"/>
-        <path class="draw fillin" d="M342 188 C352 166 380 156 420 154 H478 C494 154 500 168 490 178 L362 190 Z" fill="var(--text)" stroke="var(--text)" stroke-width="2"/>
-        <path class="draw" d="M494 200 L500 210" stroke="var(--accent-hi)" stroke-width="7" fill="none"/>
-        <ellipse class="draw" cx="174" cy="122" rx="8" ry="13" fill="none" stroke="var(--accent-hi)" stroke-width="4"/>
-        <path d="M76 350 H180 M76 344 V356 M180 344 V356" stroke="var(--muted)" stroke-width="1.2" fill="none"/>
-      </g>
-      <text x="128" y="349" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="ui-monospace,monospace">Ø 12″</text>
-      ${pop(128, 274, 44, 186, '碟煞', 1.5)}${pop(352, 250, 268, 52, '火星塞', 1.8)}${pop(372, 270, 470, 110, 'CVT', 2.1)}
-    </svg>`;
-  }
-
   // 儀表盤(240° 弧)
   function gauge(icon, label, done, total, href) {
     const r = 52, cx = 75, cy = 74, a0 = 150, sweep = 240;
@@ -104,7 +76,7 @@
             : h('a', { class: 'btn primary lg', href: '#/cert' }, APP.icon('graduation-cap', 20), '教材完成!去考照練習'),
           h('a', { class: 'btn lg', href: '#/cert' }, APP.icon('graduation-cap', 20), '丙/乙級考照')),
         h('p', { class: 'muted small', style: { marginTop: '18px' } }, '18 堂課 · 1,315 題官方學科題庫 · 11 個診斷案例 · 55 張實物照片 · 可離線使用')),
-      h('div', { html: heroArt() }))));
+      h('div', { class: 'hero-tour' }, APP.scooterTour({ tour: 'drive', autoplay: true, loop: true }).el))));
 
     main.append(h('div', { class: 'section-head' }, h('h2', null, '你的進度'), h('a', { href: '#/plan', class: 'small' }, '看 14 天課表 →')));
     main.append(h('div', { class: 'gauges' },

@@ -67,18 +67,18 @@
 
   // 各章對應的零件位置(藍圖速克達要亮的地方)
   const LESSON_ZONES = {
-    'big-picture': { z: ['engine', 'cvt', 'front-brake', 'battery'] },
+    'big-picture': { tour: 'drive' },
     'four-stroke': { z: ['engine', 'plug'] },
-    'fuel-injection': { z: ['intake', 'fuel', 'plug'] },
-    'cvt': { z: ['cvt'] },
-    'brakes-tires': { z: ['front-brake', 'rear-brake', 'front-tire'] },
+    'fuel-injection': { tour: 'drive' },
+    'cvt': { tour: 'drive', start: 3 },
+    'brakes-tires': { tour: 'brake' },
     'electrical-basics': { z: ['battery', 'fuse', 'headlight'] },
     'maintenance-map': { z: ['engine', 'cvt', 'front-brake', 'battery', 'front-tire'] },
     'no-start': { z: ['battery', 'fuel', 'plug'] },
     'multimeter-basics': { z: ['battery', 'fuse'] },
-    'charging-system': { z: ['charging', 'battery'] },
+    'charging-system': { tour: 'drive', start: 5 },
     'wiring-faults': { z: ['fuse', 'headlight', 'dash'] },
-    'ev-architecture': { mode: 'ev', z: ['ev-battery', 'controller', 'hubmotor', 'chargeport'] },
+    'ev-architecture': { tour: 'ev' },
     'ev-safety': { mode: 'ev', z: ['ev-battery', 'chargeport'] },
     'ev-diagnosis': { mode: 'ev', z: ['stand', 'hubmotor', 'ev-battery'] },
   };
@@ -91,7 +91,8 @@
     main.append(h('p', null, h('a', { href: '#/learn' }, '← 學習地圖')));
     // 章節主視覺:講到車上的哪裡,就在藍圖速克達上亮哪裡;沒有特定零件的章節用大圖示
     const zones = LESSON_ZONES[l.id];
-    const art = zones ? APP.scooter({ mode: zones.mode || 'ice', states: Object.fromEntries(zones.z.map((z) => [z, 'lesson'])), aria: '本章介紹的零件位置' }).el
+    const art = zones && zones.tour ? APP.scooterTour({ tour: zones.tour, start: zones.start, autoplay: true }).el
+      : zones ? APP.scooter({ mode: zones.mode || 'ice', states: Object.fromEntries(zones.z.map((z) => [z, 'lesson'])), aria: '本章介紹的零件位置' }).el
       : h('div', { class: 'stage-art', 'aria-hidden': 'true' }, APP.icon(LESSON_ICON[l.id] || 'book-open', 112), h('span', null, 'STAGE 0' + l.stage));
     const nextIdx = idx + 1 < D.lessons.length ? D.lessons[idx + 1] : null;
     main.append(h('header', { class: 'lesson-hero' },

@@ -4,6 +4,9 @@
 
   /* ================= 動畫圖解 ================= */
   const VISUALS = [
+    ['tour-drive', '機車怎麼跑起來', '送油、吸氣、點火、CVT、排氣、充電,在同一台車上一步一步看。', 'bike'],
+    ['tour-brake', '煞車怎麼停下來', '握把 → 油壓 → 卡鉗 → 碟盤,看力量怎麼傳過去。', 'disc-3'],
+    ['tour-ev', '電動車怎麼動', '電池 → 控制器 → 輪轂馬達,還有動能回收和充電。', 'zap'],
     ['fourstroke', '四行程引擎', '吸、壓、爆、排。拖動曲軸角度,看活塞、氣門與火花的時機。', 'cog'],
     ['cvt', 'CVT 無段變速', '拉動轉速滑桿,看皮帶如何在兩個盤上變換位置;勾選「普利珠磨損」看症狀怎麼來。', 'gauge'],
     ['evflow', '電動車能量流', '待機、加速、煞車回充、充電,能量往哪個方向流?', 'battery-charging'],
@@ -23,6 +26,21 @@
   };
 
   /* ================= 零件地圖 ================= */
+  // 零件在藍圖速克達(viewBox 520×360)上的位置;電動車的 12V 電池、保險絲在車頭內
+  const PART_POS = {
+    headlight: [155, 130], lever: [252, 82], fork: [138, 242], fbrake: [128, 274], ftire: [92, 318], rtire: [430, 318], rshock: [436, 238],
+    fusebox: [272, 250], aux12: [242, 256], engine: [318, 284], plug: [302, 262], throttle: [338, 246], airfilter: [400, 242], fuel: [356, 212],
+    cvt: [372, 276], gearbox: [404, 276], exhaust: [470, 296], regulator: [212, 212],
+    hvpack: [306, 256], controller: [420, 238], hubmotor: [398, 274], chargeport: [222, 178], dcdc: [360, 226], sidestand: [304, 312],
+  };
+  const PART_POS_EV = { aux12: [190, 196], fusebox: [226, 212] };
+  function partsSVG(mode, parts, selectedId) {
+    const dots = parts.map((p, i) => {
+      const [x, y] = (mode === 'ev' && PART_POS_EV[p.id]) || PART_POS[p.id] || [p.x, p.y];
+      return `<g class="hot${p.id === selectedId ? ' sel' : ''}" data-id="${p.id}" transform="translate(${x},${y})" tabindex="0" role="button" aria-label="${i + 1}. ${p.name}"><circle class="dot" r="10"/><text text-anchor="middle" y="4">${i + 1}</text></g>`;
+    }).join('');
+    return `<svg viewBox="0 0 520 360" role="img" aria-label="${mode === 'ev' ? '電動' : '燃油'}機車零件位置圖">${APP.scooterBase(mode)}${dots}</svg>`;
+  }
   APP.views.parts = function (main) {
     let mode = 'ice', sel = null;
     main.append(APP.head('bike', '零件地圖'), h('p', { class: 'muted' }, '點圖上的編號圓點,看這個零件「做什麼、壞了會怎樣、怎麼保養、新手能不能碰」。'));
@@ -32,8 +50,8 @@
       box.innerHTML = '';
       const parts = D.parts.filter((p) => p.mode === 'both' || p.mode === mode);
       box.append(h('div', { class: 'row mb' }, [['ice', '燃油機車'], ['ev', '電動機車']].map(([k, t]) => h('button', { class: 'btn small' + (mode === k ? ' primary' : ''), onclick: () => { mode = k; sel = null; render(); } }, t))));
-      const svgBox = h('div', { html: APP.widgets.scooterSVG(mode, sel && sel.id) });
-      svgBox.querySelectorAll('.hot').forEach((g) => (g.onclick = () => pick(parts.find((p) => p.id === g.dataset.id))));
+      const svgBox = h('div', { class: 'scooter parts-map', html: partsSVG(mode, parts, sel && sel.id) + '<p class="sc-note">以常見 125cc 速克達為例,實際位置依車型不同</p>' });
+      svgBox.querySelectorAll('.hot').forEach((g) => { const go = () => pick(parts.find((p) => p.id === g.dataset.id)); g.onclick = go; g.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }; });
       const info = h('div', { class: 'card' });
       function fill() {
         info.innerHTML = '';
