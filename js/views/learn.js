@@ -12,9 +12,15 @@
       case 'tip': return h('div', { class: 'callout' }, h('div', { class: 'ttl' }, '✅ ' + (b.title || '小提醒')), h('p', { html: APP.rich(b.text) }));
       case 'warn': return h('div', { class: 'callout warn' }, h('div', { class: 'ttl' }, '⚠️ ' + (b.title || '注意')), h('p', { html: APP.rich(b.text) }));
       case 'key': return h('div', { class: 'callout key' }, h('div', { class: 'ttl' }, '📌 重點整理'), h('ul', null, b.items.map((i) => h('li', { html: APP.rich(i) }))));
-      case 'table': return h('div', { class: 'table-wrap' }, h('table', null,
-        h('thead', null, h('tr', null, b.head.map((x) => h('th', null, x)))),
-        h('tbody', null, b.rows.map((r) => h('tr', null, r.map((c) => h('td', { html: APP.rich(c) })))))));
+      case 'photos': { const els = b.ids.map((id) => APP.photo(id)).filter(Boolean); return els.length ? h('div', { class: 'photo-row' }, els) : h('div'); }
+      case 'table': {
+        // 欄位內容寫成 @photo:id 代表照片;若整欄照片都不存在就隱藏該欄
+        const isPh = (c) => typeof c === 'string' && c.startsWith('@photo:');
+        const showCol = b.head.map((_, ci) => !b.rows.some((r) => isPh(r[ci])) || b.rows.some((r) => isPh(r[ci]) && APP.hasPhoto(r[ci].slice(7))));
+        return h('div', { class: 'table-wrap' }, h('table', null,
+          h('thead', null, h('tr', null, b.head.map((x, ci) => (showCol[ci] ? h('th', null, x) : null)))),
+          h('tbody', null, b.rows.map((r) => h('tr', null, r.map((c, ci) => (!showCol[ci] ? null : isPh(c) ? h('td', null, APP.thumb(c.slice(7)) || '') : h('td', { html: APP.rich(c) }))))))));
+      }
       case 'widget': { const box = h('div'); APP.widgets[b.id](box); if (b.id !== 'nostart') markVisual(b.id); return box; }
       case 'link': return h('p', null, h('a', { class: 'btn', href: b.to }, b.label));
       default: return h('div');

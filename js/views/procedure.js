@@ -33,7 +33,8 @@
       root.innerHTML = '';
       const chosen = new Set();
       const chips = APP.shuffle(p.prep.tools).map((tool) => {
-        const c = h('span', { class: 'tool-chip' }, tool.n);
+        const pid = APP.data.toolPhotoId ? APP.data.toolPhotoId(tool.n) : null;
+        const c = h('span', { class: 'tool-chip' }, pid ? h('img', { class: 'chip-thumb', src: APP.photoUrl(pid), alt: '' }) : null, tool.n);
         c.onclick = () => { if (c.dataset.locked) return; if (chosen.has(tool)) { chosen.delete(tool); c.classList.remove('sel'); } else { chosen.add(tool); c.classList.add('sel'); } };
         c._tool = tool;
         return c;

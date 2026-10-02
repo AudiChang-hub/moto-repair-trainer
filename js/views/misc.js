@@ -39,6 +39,7 @@
         info.innerHTML = '';
         if (!sel) { info.append(h('p', { class: 'muted' }, '👆 請點圖上的圓點,或從下方清單選擇零件。')); return; }
         info.append(h('div', { class: 'row spread' }, h('h2', { style: { margin: 0 } }, sel.name), h('div', { class: 'row' }, h('span', { class: 'pill info' }, sel.sys), h('span', { class: 'pill ' + (sel.diy === 1 ? 'ok' : sel.diy === 2 ? 'warn' : 'bad') }, D.diyLabel[sel.diy]))),
+          (D.partPhoto && D.partPhoto[sel.id] && APP.hasPhoto(D.partPhoto[sel.id])) ? h('div', { style: { maxWidth: '360px', margin: '10px 0' } }, APP.photo(D.partPhoto[sel.id])) : null,
           h('p', null, h('strong', null, '它做什麼:'), sel.what), h('p', null, h('strong', null, '壞了會怎樣:'), sel.fail), h('p', null, h('strong', null, '保養/處理:'), sel.service));
       }
       function pick(p) {
@@ -97,7 +98,7 @@
           h('span', { class: 'pill' }, g.cat),
           h('div', { class: 'term' }, g.term),
           h('div', { class: 'muted' }, g.en),
-          flipped ? h('div', { style: { marginTop: '16px', maxWidth: '520px' } }, h('p', { style: { fontSize: '1.15rem', fontWeight: 600 }, html: APP.rich(g.plain) }), h('p', { class: 'muted', html: APP.rich(g.detail) })) : h('p', { class: 'muted small', style: { marginTop: '16px' } }, '(點一下翻面)'));
+          flipped ? h('div', { style: { marginTop: '16px', maxWidth: '520px' } }, (D.glossPhoto && D.glossPhoto[g.id] && APP.hasPhoto(D.glossPhoto[g.id])) ? h('div', { style: { maxWidth: '300px', margin: '0 auto 10px' }, onclick: (e) => e.stopPropagation() }, APP.photo(D.glossPhoto[g.id], { nocaption: true })) : null, h('p', { style: { fontSize: '1.15rem', fontWeight: 600 }, html: APP.rich(g.plain) }), h('p', { class: 'muted', html: APP.rich(g.detail) })) : h('p', { class: 'muted small', style: { marginTop: '16px' } }, '(點一下翻面)'));
         card.onclick = () => { if (!flipped) { flipped = true; show(); } };
         box.append(h('div', { class: 'muted small mb' }, `${i + 1} / ${queue.length}`), card);
         if (flipped) {

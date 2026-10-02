@@ -78,6 +78,38 @@
     toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
   };
 
+
+  /* ---------- 照片:縮圖/圖說/授權/燈箱 ---------- */
+  APP.hasPhoto = (id) => !!(APP.data.photos && APP.data.photos[id]);
+  APP.photoUrl = (id) => 'assets/photos/' + APP.data.photos[id].file;
+  APP.credit = function (p) {
+    return h('div', { class: 'credit' }, '📷 ', p.author || '作者不詳', ' · ', h('a', { href: p.page, target: '_blank', rel: 'noopener' }, p.license || '授權'), ' · Wikimedia Commons');
+  };
+  APP.lightbox = function (id) {
+    const p = APP.data.photos[id]; if (!p) return;
+    const close = () => { ov.remove(); document.removeEventListener('keydown', esc); };
+    const esc = (e) => { if (e.key === 'Escape') close(); };
+    const ov = h('div', { class: 'lightbox', onclick: (e) => { if (e.target === ov) close(); } },
+      h('div', { class: 'lb-box' }, h('button', { class: 'lb-x', 'aria-label': '關閉', onclick: close }, '✕'),
+        h('img', { src: APP.photoUrl(id), alt: p.zh }),
+        h('div', { class: 'lb-cap' }, h('strong', null, p.zh), h('div', null, p.caption), APP.credit(p))));
+    document.body.append(ov); document.addEventListener('keydown', esc);
+  };
+  // 完整圖片卡(圖 + 中文名 + 圖說 + 授權)
+  APP.photo = function (id, o) {
+    o = o || {};
+    if (!APP.hasPhoto(id)) return null;
+    const p = APP.data.photos[id];
+    const img = h('img', { src: APP.photoUrl(id), alt: p.zh, loading: 'lazy', onclick: () => APP.lightbox(id), title: '點一下放大' });
+    return h('figure', { class: 'photo' }, img, h('figcaption', null, h('strong', null, p.zh), o.nocaption ? null : h('div', { class: 'muted small' }, p.caption), APP.credit(p)));
+  };
+  // 小縮圖(表格、標籤用)
+  APP.thumb = function (id) {
+    if (!APP.hasPhoto(id)) return null;
+    const p = APP.data.photos[id];
+    return h('img', { class: 'thumb', src: APP.photoUrl(id), alt: p.zh, loading: 'lazy', title: p.zh + '(點一下放大)', onclick: (e) => { e.stopPropagation(); APP.lightbox(id); } });
+  };
+
   /* ---------- 進度查詢 ---------- */
   APP.done = {
     lesson: (id) => !!(S.lessons[id] && S.lessons[id].done),
@@ -163,6 +195,7 @@
     ['proc', '🔧', '流程演練'],
     ['lab', '⚡', '電表實驗室'],
     ['visual', '🎞️', '動畫圖解'],
+    ['gallery', '📷', '工具零件圖鑑'],
     ['parts', '🏍️', '零件地圖'],
     ['cards', '🃏', '術語閃卡'],
     ['mistakes', '📕', '錯題本'],

@@ -85,7 +85,7 @@
         h('div', { style: { marginTop: '6px' }, html: '💡 <strong>白話解析</strong><br>' + APP.rich(q.exp || '(這題尚無解析,請記住官方答案)') })));
       const hp = helpers(q);
       if (hp.length) el.append(h('details', { class: 'card flat', style: { margin: '10px 0 0', padding: '10px 14px' } }, h('summary', { style: { cursor: 'pointer', fontWeight: 600 } }, '📖 名詞小幫手(題目裡的專有名詞)'),
-        h('ul', { style: { margin: '8px 0 0' } }, hp.map((g) => h('li', { html: `<strong>${APP.esc(g.term)}</strong>:${APP.rich(g.plain)}` })))));
+        h('ul', { style: { margin: '8px 0 0', paddingLeft: '1.2em' } }, hp.map((g) => h('li', { style: { margin: '8px 0', overflow: 'hidden' } }, (D.glossPhoto && D.glossPhoto[g.id] && APP.hasPhoto(D.glossPhoto[g.id])) ? h('div', { style: { float: 'right', marginLeft: '10px' } }, APP.thumb(D.glossPhoto[g.id])) : null, h('span', { html: `<strong>${APP.esc(g.term)}</strong>:${APP.rich(g.plain)}` }))))));
       const star = h('button', { class: 'btn small', onclick: () => { const f = toggleFlag(q); star.textContent = f ? '⭐ 已標記(再按取消)' : '☆ 標記為不熟'; } }, S.bank[q.id] && S.bank[q.id].flag ? '⭐ 已標記(再按取消)' : '☆ 標記為不熟');
       el.append(h('div', { class: 'row mt' }, star));
       return el;
