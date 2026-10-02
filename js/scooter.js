@@ -8,58 +8,105 @@
   // CVT 長殼從引擎延伸到後輪軸、空濾箱在 CVT 上方、排氣管從汽缸頭下方繞到後輪右側。實際位置依車型不同。
   const Z = {
     'front-tire': [92, 318, '前輪胎', 52, 190], 'front-brake': [128, 274, '前碟煞', 80, 344],
-    'rear-tire': [442, 320, '後輪胎', 474, 252], 'rear-brake': [398, 274, '後煞車', 474, 206],
+    'rear-tire': [442, 320, '後輪胎', 486, 300], 'rear-brake': [398, 274, '後煞車', 474, 206],
     headlight: [152, 130, '大燈/燈組', 96, 70], dash: [214, 82, '儀表/開關', 262, 38],
     battery: [262, 257, '電瓶', 232, 168], fuse: [290, 257, '保險絲', 304, 140], fuel: [356, 212, '油箱/油泵', 382, 108],
-    intake: [402, 242, '空濾/節氣門', 452, 150], plug: [302, 264, '火星塞', 300, 72], engine: [318, 284, '引擎', 200, 344],
-    cvt: [376, 278, 'CVT 傳動', 392, 344], charging: [342, 288, '發電/整流', 288, 344], exhaust: [476, 298, '排氣管', 482, 344],
-    stand: [304, 310, '側柱開關', 232, 344], 'ev-battery': [284, 258, '電池包', 304, 140], controller: [420, 238, '控制器', 470, 150],
+    intake: [402, 242, '空濾/節氣門', 452, 150], plug: [302, 264, '火星塞', 300, 72], engine: [318, 284, '引擎', 146, 344],
+    cvt: [376, 278, 'CVT 傳動', 430, 344], charging: [342, 288, '發電/整流', 318, 344], exhaust: [476, 298, '排氣管', 482, 252],
+    stand: [304, 310, '側柱開關', 222, 344], 'ev-battery': [284, 258, '電池包', 304, 140], controller: [420, 238, '控制器', 470, 150],
     hubmotor: [398, 274, '輪轂馬達', 470, 252], chargeport: [222, 178, '充電孔', 140, 186], dcdc: [360, 226, 'DC-DC', 382, 108],
   };
   APP.scooterZones = Z;
   APP.scooterBase = (mode) => base(mode);
 
-  // 車輪:深色輪胎 + 輪框 + 輪轂
-  const wheel = (cx, ev, cls) => `<circle cx="${cx}" cy="274" r="50" fill="var(--sc-tire)" stroke="var(--sc-line)" stroke-width="2.5"/>
-    <circle cx="${cx}" cy="274" r="33" fill="var(--sc-rim)" stroke="var(--sc-line)" stroke-width="2"/><g class="sc-spk ${cls}" style="transform-origin:${cx}px 274px">` +
-    (ev ? `<circle cx="${cx}" cy="274" r="26" fill="var(--sc-metal)" stroke="var(--sc-line)" stroke-width="2"/><path d="M${cx} 256v6M${cx + 17} 268l-6 2M${cx + 11} 289l-4 -5M${cx - 11} 289l4 -5M${cx - 17} 268l6 2" stroke="var(--sc-line)" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="274" r="8" fill="var(--sc-line)"/>`
-        : `<path d="M${cx} 245v58M${cx - 29} 274h58M${cx - 20} 254l40 40M${cx + 20} 254l-40 40" stroke="var(--sc-spoke)" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="274" r="10" fill="var(--sc-metal)" stroke="var(--sc-line)" stroke-width="2"/>`) + '</g>';
+  // 每張圖的漸層要有自己的 id(同頁可能有好幾台車)
+  let uid = 0;
+  const st = (c) => `style="stop-color:${c}"`;
 
+  // 車輪:輪胎 + 五爪鋁圈(前輪多一片碟盤);電動車後輪是輪轂馬達
+  function wheel(cx, kind, cls, u) {
+    const c = 274;
+    let s = `<circle cx="${cx}" cy="${c}" r="50" fill="url(#sct${u})" stroke="var(--sc-line)" stroke-width="1.8"/>
+      <circle cx="${cx}" cy="${c}" r="44" fill="none" stroke="var(--sc-tread)" stroke-width="2.5"/>
+      <circle cx="${cx}" cy="${c}" r="36" fill="var(--sc-wheel)" stroke="var(--sc-rim)" stroke-width="4"/>`;
+    s += `<g class="sc-spk ${cls}" style="transform-origin:${cx}px ${c}px">`;
+    if (kind === 'motor') {
+      s += `<circle cx="${cx}" cy="${c}" r="31" fill="url(#scm${u})" stroke="var(--sc-line)" stroke-width="1.5"/>
+        <circle cx="${cx}" cy="${c}" r="19" fill="none" stroke="var(--sc-line)" stroke-width="1.5" opacity=".6"/>`;
+      for (let k = 0; k < 6; k++) { const a = (k * Math.PI) / 3; s += `<circle cx="${(cx + 25 * Math.cos(a)).toFixed(1)}" cy="${(c + 25 * Math.sin(a)).toFixed(1)}" r="2.2" fill="var(--sc-line)"/>`; }
+      s += `<circle cx="${cx}" cy="${c}" r="8" fill="var(--sc-trim)" stroke="var(--sc-rim)" stroke-width="2"/>`;
+    } else {
+      let d = '';
+      for (let k = 0; k < 5; k++) { const a = (k * 2 * Math.PI) / 5 - Math.PI / 2; d += `M${(cx + 9 * Math.cos(a)).toFixed(1)} ${(c + 9 * Math.sin(a)).toFixed(1)}L${(cx + 33 * Math.cos(a)).toFixed(1)} ${(c + 33 * Math.sin(a)).toFixed(1)}`; }
+      s += `<path d="${d}" stroke="var(--sc-rim)" stroke-width="7" stroke-linecap="round"/>`;
+      if (kind === 'front') s += `<circle cx="${cx}" cy="${c}" r="25" fill="none" stroke="var(--sc-disc)" stroke-width="8" opacity=".92"/>
+        <circle cx="${cx}" cy="${c}" r="25" fill="none" stroke="var(--sc-line)" stroke-width="2" stroke-dasharray="2 7" opacity=".55"/>`;
+      s += `<circle cx="${cx}" cy="${c}" r="10" fill="var(--sc-rim)" stroke="var(--sc-line)" stroke-width="1.5"/><circle cx="${cx}" cy="${c}" r="3.5" fill="var(--sc-line)"/>`;
+    }
+    return s + '</g>';
+  }
+
+  // 一台常見 125cc 速克達的左側視圖(車頭朝左)
   function base(mode) {
-    const ev = mode === 'ev';
-    const L = 'stroke="var(--sc-line)" stroke-width="2.5"';
-    return `<path d="M30 330H500" stroke="var(--border2)" stroke-width="2" stroke-dasharray="2 9" fill="none"/>
+    const ev = mode === 'ev', u = ++uid;
+    const L = 'stroke="var(--sc-line)" stroke-width="1.8"';
+    return `<defs>
+        <linearGradient id="scb${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" ${st('var(--sc-body)')}/><stop offset="1" ${st('var(--sc-body2)')}/></linearGradient>
+        <linearGradient id="scf${u}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" ${st('var(--sc-body2)')}/><stop offset=".55" ${st('var(--sc-body)')}/><stop offset="1" ${st('var(--sc-body2)')}/></linearGradient>
+        <linearGradient id="scm${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" ${st('var(--sc-metal-hi)')}/><stop offset="1" ${st('var(--sc-metal)')}/></linearGradient>
+        <linearGradient id="scs${u}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" ${st('var(--sc-seat-hi)')}/><stop offset="1" ${st('var(--sc-seat)')}/></linearGradient>
+        <radialGradient id="sct${u}"><stop offset=".7" ${st('var(--sc-tire)')}/><stop offset="1" ${st('var(--sc-tire2)')}/></radialGradient>
+      </defs>
+      <ellipse cx="262" cy="326" rx="232" ry="7" fill="var(--sc-shadow)"/>
       <g stroke-linecap="round" stroke-linejoin="round">
-        ${ev ? '' : `<path d="M300 292 C312 314 372 316 412 302" stroke="var(--sc-metal)" stroke-width="8" fill="none"/>
-        <path d="M404 284 H478 Q494 284 494 296 Q494 308 478 308 H404 Z" fill="var(--sc-metal)" ${L}/>`}
-        <path d="M424 264 L446 214" stroke="var(--sc-metal)" stroke-width="7" fill="none"/>
-        <path d="M428 252 l12 -4 M432 242 l12 -4 M436 232 l12 -4" stroke="var(--sc-line)" stroke-width="2" fill="none"/>
-        ${wheel(398, ev, 'sc-r')}${wheel(128, false, 'sc-f')}
-        <path d="M128 274 L148 210" stroke="var(--sc-metal)" stroke-width="9" fill="none"/>
-        <path d="M82 252 C86 212 158 204 176 240 L166 246 C150 222 102 224 94 254 Z" fill="var(--sc-body)" ${L}/>
-        ${ev ? `<path d="M330 266 L398 268 L398 282 L330 282 Z" fill="var(--sc-metal)" ${L}/>`
-             : `<path d="M366 242 C340 242 318 250 304 266" stroke="var(--sc-metal)" stroke-width="6" fill="none"/>
-        <path d="M336 250 H398 A26 26 0 0 1 398 302 H348 Q332 302 332 286 V262 Q332 250 336 250 Z" fill="var(--sc-body2)" ${L}/>
-        <path d="M346 266 L376 262 M346 286 L376 290" stroke="var(--sc-line)" stroke-width="1.5" opacity=".55"/>
-        <g class="sc-pul" style="transform-origin:346px 276px"><circle cx="346" cy="276" r="9" fill="none" stroke="var(--sc-line)" stroke-width="2"/><path d="M346 269v14M339 276h14" stroke="var(--sc-line)" stroke-width="1.5"/></g>
-        <g class="sc-pul" style="transform-origin:376px 276px"><circle cx="376" cy="276" r="13" fill="none" stroke="var(--sc-line)" stroke-width="2"/><path d="M376 266v20M366 276h20" stroke="var(--sc-line)" stroke-width="1.5"/></g>
-        <path d="M298 270 H334 V298 H298 Q290 298 290 290 V278 Q290 270 298 270 Z" fill="var(--sc-body2)" ${L}/>
-        <path d="M306 272 V296 M313 272 V296 M320 272 V296" stroke="var(--sc-line)" stroke-width="1.5"/>
-        <rect x="299" y="261" width="7" height="10" rx="2" fill="var(--sc-line)"/>
-        <path d="M368 234 H426 Q434 234 434 242 V250 H368 Z" fill="var(--sc-body2)" ${L}/>`}
-        <path d="M326 250 C330 224 342 206 362 198 L484 182 C500 180 510 188 508 198 C506 210 496 216 482 218 C454 222 432 222 414 226 C388 232 362 240 350 254 Z" fill="var(--sc-body)" ${L}/>
-        <path d="M344 200 C350 186 366 178 390 176 L482 168 C498 167 506 176 500 184 L362 198 Z" fill="var(--sc-seat)" ${L}/>
-        <path d="M454 174 L502 170" stroke="var(--sc-metal)" stroke-width="5" fill="none"/>
-        <path d="M502 188 L511 192 L507 202 L500 200 Z" fill="#e5484d" stroke="var(--sc-line)" stroke-width="1.5"/>
-        <path d="M226 244 H338 V262 Q338 268 332 268 H234 Q226 268 224 262 Z" fill="var(--sc-body)" ${L}/>
-        ${ev ? '<rect x="240" y="250" width="90" height="13" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>' : ''}
-        <path d="M168 92 L206 98 C214 140 226 196 238 246 L228 250 C212 236 194 226 170 220 C154 216 142 208 140 196 C142 160 152 124 168 92 Z" fill="var(--sc-body)" ${L}/>
-        <path d="M150 116 C156 112 162 114 162 122 L160 142 C158 148 150 148 148 142 Z" fill="#ffe9a8" stroke="var(--sc-line)" stroke-width="2"/>
-        <path d="M176 92 C180 78 194 72 212 72 L244 74 C250 76 250 84 244 86 L206 94 Z" fill="var(--sc-body)" ${L}/>
-        <path d="M244 80 L264 84" stroke="var(--sc-seat)" stroke-width="7" fill="none"/>
-        <path d="M206 74 L196 50" stroke="var(--sc-metal)" stroke-width="3" fill="none"/><ellipse cx="194" cy="46" rx="10" ry="6" fill="var(--sc-body)" ${L}/>
-        <path d="M312 296 L298 322" stroke="var(--sc-metal)" stroke-width="4" fill="none"/>
-        <path d="M344 302 L338 326 M330 326 H348" stroke="var(--sc-metal)" stroke-width="4" fill="none"/>
+        ${ev ? '' : `<path d="M298 294 C306 314 360 318 410 304" stroke="url(#scm${u})" stroke-width="8" fill="none"/>
+        <path d="M404 282 H474 C488 282 496 290 496 296 C496 304 488 310 474 310 H404 Z" fill="url(#scm${u})" ${L}/>
+        <path d="M486 290 H496 M486 302 H496" stroke="var(--sc-line)" stroke-width="1.5" opacity=".5"/>`}
+        ${wheel(398, ev ? 'motor' : 'rear', 'sc-r', u)}
+        ${wheel(128, 'front', 'sc-f', u)}
+        <path d="M128 274 L141 240" stroke="var(--sc-trim)" stroke-width="12" fill="none"/>
+        <path d="M140 242 L156 200" stroke="url(#scm${u})" stroke-width="8" fill="none"/>
+        <path d="M141 243 Q147 239 152 244 L156 262 Q157 268 151 269 L146 268 Q143 256 141 243 Z" transform="rotate(-20 148 256)" fill="var(--sc-trim)" stroke="var(--sc-metal)" stroke-width="1.5"/>
+        <path d="M70 252 A60 60 0 0 1 176 238 L170 244 A53 53 0 0 0 78 256 Z" fill="var(--sc-trim)" ${L}/>
+        ${ev ? `<path d="M316 262 C350 260 380 262 398 264 A11 11 0 0 1 398 286 C380 286 350 284 316 280 Q310 271 316 262 Z" fill="url(#scm${u})" ${L}/>`
+             : `<path d="M368 244 C342 244 318 252 304 266" stroke="var(--sc-trim)" stroke-width="7" fill="none"/>
+        <path d="M296 268 H334 V300 H296 Q288 300 288 292 V276 Q288 268 296 268 Z" fill="url(#scm${u})" ${L}/>
+        <path d="M304 270 V298 M311 270 V298 M318 270 V298 M325 270 V298" stroke="var(--sc-line)" stroke-width="1.3" opacity=".6"/>
+        <rect x="298" y="258" width="8" height="12" rx="2" fill="var(--sc-trim)" stroke="var(--sc-line)" stroke-width="1"/>
+        <path d="M338 250 H398 A27 27 0 0 1 398 304 H350 Q332 304 332 288 V262 Q332 250 338 250 Z" fill="url(#scf${u})" ${L}/>
+        <path d="M346 265 L376 261 M346 287 L376 291" stroke="var(--sc-line)" stroke-width="1.4" opacity=".45"/>
+        <g class="sc-pul" style="transform-origin:346px 276px"><circle cx="346" cy="276" r="9" fill="none" stroke="var(--sc-line)" stroke-width="1.6" opacity=".7"/><path d="M346 269v14M339 276h14" stroke="var(--sc-line)" stroke-width="1.3" opacity=".7"/></g>
+        <g class="sc-pul" style="transform-origin:376px 276px"><circle cx="376" cy="276" r="13" fill="none" stroke="var(--sc-line)" stroke-width="1.6" opacity=".7"/><path d="M376 266v20M366 276h20" stroke="var(--sc-line)" stroke-width="1.3" opacity=".7"/></g>
+        <circle cx="398" cy="277" r="6" fill="var(--sc-metal)" stroke="var(--sc-line)" stroke-width="1.2"/>
+        <path d="M366 236 H428 Q436 236 436 244 V252 H366 Z" fill="var(--sc-trim)" ${L}/>`}
+        <path d="M424 266 L444 216" stroke="url(#scm${u})" stroke-width="8" fill="none"/>
+        <path d="M427 256 l13 -3 M431 246 l13 -3 M435 236 l13 -3" stroke="#d64535" stroke-width="2.5" fill="none"/>
+        <path d="M470 220 C488 228 500 240 506 256 L497 259 C490 244 480 234 466 228 Z" fill="var(--sc-trim)" ${L}/>
+        <rect x="494" y="250" width="22" height="14" rx="2" fill="#f4f4f2" ${L}/><path d="M499 257 h12" stroke="#666" stroke-width="2"/>
+        <path d="M330 254 C334 230 346 210 368 202 L474 186 C494 183 510 190 510 200 C510 212 500 220 486 222 L460 224 C440 214 416 212 398 218 C378 226 362 240 354 254 Z" fill="url(#scb${u})" ${L}/>
+        <path d="M352 212 C380 204 430 197 486 190" stroke="var(--sc-gloss)" stroke-width="2.5" fill="none"/>
+        <path d="M398 218 C416 212 440 214 460 224 L486 222" stroke="var(--sc-trim)" stroke-width="3" fill="none" opacity=".7"/>
+        <path d="M498 192 C506 192 511 196 511 202 C511 208 506 212 498 212 L494 206 Z" fill="#d93a32" stroke="var(--sc-line)" stroke-width="1.5"/>
+        <path d="M346 204 C350 188 366 178 392 176 L436 172 C450 162 468 160 488 164 C502 167 506 178 498 186 L368 202 Z" fill="url(#scs${u})" ${L}/>
+        <path d="M440 174 L488 168" stroke="var(--sc-gloss)" stroke-width="1.5" opacity=".5" fill="none"/>
+        <path d="M456 184 L500 179 L506 186" stroke="url(#scm${u})" stroke-width="5" fill="none"/>
+        <path d="M222 248 H338 L342 264 Q342 268 336 268 H232 Q224 268 222 260 Z" fill="var(--sc-trim)" ${L}/>
+        <path d="M226 248 H336" stroke="var(--sc-body)" stroke-width="5"/>
+        <path d="M228 245 H334" stroke="var(--sc-line)" stroke-width="1.5"/>
+        ${ev ? '<rect x="238" y="251" width="94" height="13" rx="4" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>' : ''}
+        <path d="M91 222 A64 64 0 0 1 183 242 C196 246 210 248 224 250 L232 250 C222 220 212 170 208 114 L198 102 C184 98 170 100 162 104 C146 128 126 162 112 192 C104 206 96 214 91 222 Z" fill="url(#scb${u})" ${L}/>
+        <path d="M200 116 C204 166 214 214 226 248 L232 250 C222 220 212 170 208 114 Z" fill="var(--sc-trim)" opacity=".85"/>
+        <path d="M160 110 C146 132 128 164 114 194" stroke="var(--sc-gloss)" stroke-width="3" fill="none"/>
+        <path d="M150 116 C156 108 166 106 170 110 L166 132 C162 140 152 142 146 136 Z" fill="var(--sc-lamp)" stroke="var(--sc-line)" stroke-width="1.5"/>
+        <path d="M152 120 C156 115 162 114 165 116" stroke="#fff" stroke-width="2" fill="none" opacity=".8"/>
+        <path d="M118 176 L128 170 L130 180 L120 186 Z" fill="#f0a020" stroke="var(--sc-line)" stroke-width="1.2"/>
+        <path d="M160 102 C168 86 186 78 210 76 L240 78 C248 80 248 88 240 90 L214 96 C194 100 176 104 160 102 Z" fill="url(#scb${u})" ${L}/>
+        <path d="M196 86 C204 82 214 81 224 82" stroke="var(--sc-trim)" stroke-width="5" fill="none"/>
+        <path d="M236 84 L268 88" stroke="var(--sc-trim)" stroke-width="8" fill="none"/>
+        <path d="M240 92 L270 98" stroke="var(--sc-metal)" stroke-width="2.5" fill="none"/>
+        <path d="M204 78 L194 52" stroke="var(--sc-metal)" stroke-width="2.5" fill="none"/><ellipse cx="192" cy="46" rx="11" ry="7" fill="var(--sc-trim)" ${L}/>
+        <path d="M312 298 L298 322" stroke="url(#scm${u})" stroke-width="4.5" fill="none"/>
+        <path d="M344 304 L338 326 M330 326 H348" stroke="url(#scm${u})" stroke-width="4.5" fill="none"/>
       </g>`;
   }
 

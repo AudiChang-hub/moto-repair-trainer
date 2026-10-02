@@ -3,7 +3,7 @@
    方向:維修工作台 × 儀表板。暖白紙張 / 深炭灰,安全橘為唯一強調色。
    ========================================================= */
 :root{
-  --sc-body:#f3efe7; --sc-body2:#e3ddd1; --sc-line:#1b1e24; --sc-seat:#2a2d33; --sc-tire:#24272c; --sc-rim:#d9dde2; --sc-metal:#9aa2ad; --sc-spoke:#6c747f;
+  --sc-body:#f7f5f0; --sc-body2:#d6d1c6; --sc-line:#1f2329; --sc-trim:#2b2f35; --sc-seat:#1b1e23; --sc-seat-hi:#4b5058; --sc-tire:#1d2024; --sc-tire2:#373b42; --sc-tread:rgba(255,255,255,.07); --sc-wheel:#3a3f47; --sc-rim:#c9ced5; --sc-disc:#aab1ba; --sc-metal:#7f8893; --sc-metal-hi:#e2e6ea; --sc-gloss:rgba(255,255,255,.9); --sc-lamp:#fff3c4; --sc-shadow:rgba(0,0,0,.13);
   --bg:#f5f3ee; --bg2:#ece8df; --card:#ffffff; --card2:#faf9f6;
   --text:#15171c; --text2:#363a42; --muted:#5f6670; --border:#e4dfd4; --border2:#d6d0c3;
   --accent:#c2410c; --accent-hi:#ff6a1a; --accent-soft:#fff1e8; --accent-ink:#ffffff;
@@ -22,7 +22,7 @@
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --sc-body:#2b3038; --sc-body2:#363c46; --sc-line:#d6dae0; --sc-seat:#0e1013; --sc-tire:#0b0c0e; --sc-rim:#4a525e; --sc-metal:#7d8794; --sc-spoke:#a3acb8;
+    --sc-body:#a3acb7; --sc-body2:#5b6470; --sc-line:#0c0e11; --sc-trim:#24282e; --sc-seat:#121418; --sc-seat-hi:#3d424a; --sc-tire:#101215; --sc-tire2:#3a3f47; --sc-tread:rgba(255,255,255,.08); --sc-wheel:#2c3138; --sc-rim:#b4bbc4; --sc-disc:#8d959f; --sc-metal:#69727d; --sc-metal-hi:#c9cfd6; --sc-gloss:rgba(255,255,255,.55); --sc-lamp:#fff1b8; --sc-shadow:rgba(0,0,0,.45);
     --bg:#0e1013; --bg2:#14171b; --card:#171a1f; --card2:#1c2026;
     --text:#ecebe7; --text2:#cfd2d6; --muted:#9aa3ad; --border:#262b32; --border2:#323842;
     --accent:#ff7a33; --accent-hi:#ff8f52; --accent-soft:#2a1a10; --accent-ink:#1a0f08;
@@ -35,7 +35,7 @@
   }
 }
 :root[data-theme="dark"]{
-  --sc-body:#2b3038; --sc-body2:#363c46; --sc-line:#d6dae0; --sc-seat:#0e1013; --sc-tire:#0b0c0e; --sc-rim:#4a525e; --sc-metal:#7d8794; --sc-spoke:#a3acb8;
+  --sc-body:#a3acb7; --sc-body2:#5b6470; --sc-line:#0c0e11; --sc-trim:#24282e; --sc-seat:#121418; --sc-seat-hi:#3d424a; --sc-tire:#101215; --sc-tire2:#3a3f47; --sc-tread:rgba(255,255,255,.08); --sc-wheel:#2c3138; --sc-rim:#b4bbc4; --sc-disc:#8d959f; --sc-metal:#69727d; --sc-metal-hi:#c9cfd6; --sc-gloss:rgba(255,255,255,.55); --sc-lamp:#fff1b8; --sc-shadow:rgba(0,0,0,.45);
   --bg:#0e1013; --bg2:#14171b; --card:#171a1f; --card2:#1c2026;
   --text:#ecebe7; --text2:#cfd2d6; --muted:#9aa3ad; --border:#262b32; --border2:#323842;
   --accent:#ff7a33; --accent-hi:#ff8f52; --accent-soft:#2a1a10; --accent-ink:#1a0f08;
