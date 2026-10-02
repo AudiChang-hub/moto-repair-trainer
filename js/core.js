@@ -25,6 +25,18 @@
   APP.esc = esc;
   APP.rich = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/`(.+?)`/g, '<code>$1</code>').replace(/\n/g, '<br>');
 
+  // 把節點內文字裡的 **粗體** 轉成 <strong>(給直接用文字節點寫的內容)
+  APP.boldify = function (root) {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    const hit = [];
+    while (w.nextNode()) if (w.currentNode.nodeValue.includes('**')) hit.push(w.currentNode);
+    hit.forEach((n) => {
+      const frag = document.createDocumentFragment();
+      n.nodeValue.split('**').forEach((part, i) => { if (!part) return; if (i % 2) { const b = document.createElement('strong'); b.textContent = part; frag.append(b); } else frag.append(part); });
+      n.replaceWith(frag);
+    });
+  };
+
   APP.h = function (tag, attrs, ...kids) {
     const el = document.createElement(tag);
     if (attrs) {
@@ -146,6 +158,7 @@
     ['home', '🏠', '今日任務'],
     ['learn', '🗺️', '學習地圖'],
     ['cert', '🎓', '考照練習'],
+    ['brands', '🏷️', '車款專區'],
     ['diagnose', '🔍', '診斷實戰'],
     ['proc', '🔧', '流程演練'],
     ['lab', '⚡', '電表實驗室'],

@@ -62,6 +62,7 @@
         h('a', { class: 'btn primary', href: '#/learn' }, '從學習地圖開始'),
         h('a', { class: 'btn', href: '#/cert' }, '🎓 考照練習(丙/乙級)'),
         h('a', { class: 'btn', href: '#/diagnose' }, '直接挑戰診斷案例'),
+        h('a', { class: 'btn', href: '#/brands' }, '🏷️ SYM / SUZUKI / GOGORO'),
         h('a', { class: 'btn ghost', href: '#/bridge' }, '怎麼走向實車?'))));
 
     // 進度

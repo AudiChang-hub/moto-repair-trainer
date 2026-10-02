@@ -1,5 +1,5 @@
 /* 自動產生:node tools/gen-sw.js ——請勿手改 */
-const CACHE = 'moto-trainer-202610020317';
+const CACHE = 'moto-trainer-202610020321';
 const FILES = [
  "./",
  "assets/bank/b/10-24-1.jpg",
@@ -104,6 +104,7 @@ const FILES = [
  "js/data/procedures.js",
  "js/data/scenarios.js",
  "js/views/backup.js",
+ "js/views/brands.js",
  "js/views/cert.js",
  "js/views/diagnose.js",
  "js/views/home.js",
