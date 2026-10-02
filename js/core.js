@@ -83,7 +83,14 @@
   APP.hasPhoto = (id) => !!(APP.data.photos && APP.data.photos[id]);
   APP.photoUrl = (id) => 'assets/photos/' + APP.data.photos[id].file;
   APP.credit = function (p) {
+    if (p.author === '本站繪製') return h('div', { class: 'credit' }, '✏️ 本站繪製示意圖(非實物照片)');
     return h('div', { class: 'credit' }, '📷 ', p.author || '作者不詳', ' · ', h('a', { href: p.page, target: '_blank', rel: 'noopener' }, p.license || '授權'), ' · Wikimedia Commons');
+  };
+  // 「看更多實物照片」:連到圖片搜尋與購物網站(只放連結,不複製別人的照片)
+  APP.moreLink = function (p) {
+    const q = encodeURIComponent(p.q || p.zh.split(/[((—]/)[0].trim());
+    const a = (href, t) => h('a', { href, target: '_blank', rel: 'noopener' }, t);
+    return h('div', { class: 'credit' }, '🔍 看更多實物照片:', a('https://www.google.com/search?tbm=isch&q=' + q, 'Google 圖片'), ' · ', a('https://shopee.tw/search?keyword=' + q, '蝦皮'), ' · ', a('https://www.ruten.com.tw/find/?q=' + q, '露天'));
   };
   APP.lightbox = function (id) {
     const p = APP.data.photos[id]; if (!p) return;
@@ -92,7 +99,7 @@
     const ov = h('div', { class: 'lightbox', onclick: (e) => { if (e.target === ov) close(); } },
       h('div', { class: 'lb-box' }, h('button', { class: 'lb-x', 'aria-label': '關閉', onclick: close }, '✕'),
         h('img', { src: APP.photoUrl(id), alt: p.zh }),
-        h('div', { class: 'lb-cap' }, h('strong', null, p.zh), h('div', null, p.caption), APP.credit(p))));
+        h('div', { class: 'lb-cap' }, h('strong', null, p.zh), h('div', null, p.caption), APP.credit(p), APP.moreLink(p))));
     document.body.append(ov); document.addEventListener('keydown', esc);
   };
   // 完整圖片卡(圖 + 中文名 + 圖說 + 授權)
@@ -101,7 +108,7 @@
     if (!APP.hasPhoto(id)) return null;
     const p = APP.data.photos[id];
     const img = h('img', { src: APP.photoUrl(id), alt: p.zh, loading: 'lazy', onclick: () => APP.lightbox(id), title: '點一下放大' });
-    return h('figure', { class: 'photo' }, img, h('figcaption', null, h('strong', null, p.zh), o.nocaption ? null : h('div', { class: 'muted small' }, p.caption), APP.credit(p)));
+    return h('figure', { class: 'photo' }, img, h('figcaption', null, h('strong', null, p.zh), o.nocaption ? null : h('div', { class: 'muted small' }, p.caption), APP.credit(p), APP.moreLink(p)));
   };
   // 小縮圖(表格、標籤用)
   APP.thumb = function (id) {
@@ -206,7 +213,7 @@
     nav.innerHTML = '';
     nav.append(h('div', { class: 'brand' }, h('img', { src: 'assets/icon.png', alt: '', style: { width: '34px', height: '34px', borderRadius: '9px' } }), '機車維修訓練場'));
     NAV.forEach(([id, ico, label]) => nav.append(h('a', { class: 'nav-item', href: '#/' + id, 'data-id': id }, h('span', { class: 'nav-ico' }, ico), label)));
-    nav.append(h('div', { class: 'nav-foot' }, '進度存在這台電腦的瀏覽器裡。', h('br'), h('a', { href: '#/backup' }, '📦 備份 / 換裝置'), h('br'), h('a', { href: '#', onclick: (e) => { e.preventDefault(); APP.resetAll(); } }, '清除全部進度')));
+    nav.append(h('div', { class: 'nav-foot' }, '進度存在這台電腦的瀏覽器裡。', h('br'), '版本 ' + (APP.version || '本機'), h('br'), h('a', { href: '#/backup' }, '📦 備份 / 換裝置'), h('br'), h('a', { href: '#', onclick: (e) => { e.preventDefault(); APP.resetAll(); } }, '清除全部進度')));
   }
 
   function route() {
@@ -231,6 +238,12 @@
     buildNav();
     window.addEventListener('hashchange', route);
     route();
-    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      const hadController = !!navigator.serviceWorker.controller;
+      let reloaded = false;
+      // 新版接手後自動重新整理一次(第一次安裝不用)
+      navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !reloaded) { reloaded = true; location.reload(); } });
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => reg.update()).catch(() => {});
+    }
   };
 })();

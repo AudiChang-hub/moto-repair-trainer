@@ -32,6 +32,13 @@ for f in sorted(glob.glob(os.path.join(src, 'meta_*.json'))):
             zh=m['zh'], file=m['id'] + '.jpg', caption=m.get('caption', ''), author=(m.get('author') or '作者不詳').strip(),
             license=lic, license_url=m.get('license_url', ''), page=m['page'], title=m.get('title', ''))
 
+# 本站自製圖(例如找不到自由授權照片時的示意圖),檔案已放在 assets/photos/
+extra = os.path.join(root, 'tools', 'photo-extra.json')
+if os.path.exists(extra):
+    for m in json.load(open(extra, encoding='utf-8')):
+        if m['id'] not in photos and os.path.exists(os.path.join(out_dir, m['file'])):
+            photos[m['id']] = {k: m.get(k, '') for k in ('zh', 'file', 'caption', 'author', 'license', 'license_url', 'page', 'q')}
+
 with open(os.path.join(root, 'js', 'data', 'photos.js'), 'w', encoding='utf-8') as fh:
     fh.write('/* 照片資料(由 tools/build-photos.py 產生,請勿手改)。圖片取自 Wikimedia Commons,授權資訊逐張記錄。 */\n')
     fh.write('APP.data.photos = ' + json.dumps(photos, ensure_ascii=False, indent=1) + ';\n')

@@ -1,5 +1,5 @@
 /* 自動產生:node tools/gen-sw.js ——請勿手改 */
-const CACHE = 'moto-trainer-202610020505';
+const CACHE = 'moto-trainer-202610020521';
 const FILES = [
  "./",
  ".nojekyll",
@@ -105,6 +105,7 @@ const FILES = [
  "assets/photos/connector.jpg",
  "assets/photos/crankshaft.jpg",
  "assets/photos/cvt-belt.jpg",
+ "assets/photos/cvt-rollers.svg",
  "assets/photos/cvt-variator.jpg",
  "assets/photos/cylinder-head.jpg",
  "assets/photos/drum-brake.jpg",
@@ -161,6 +162,7 @@ const FILES = [
  "js/data/plan.js",
  "js/data/procedures.js",
  "js/data/scenarios.js",
+ "js/version.js",
  "js/views/backup.js",
  "js/views/brands.js",
  "js/views/cert.js",
@@ -175,13 +177,14 @@ const FILES = [
  "manifest.webmanifest"
 ];
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache:'reload' = 一定向伺服器拿新檔,不用瀏覽器暫存的舊檔
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
-// 網路優先(線上時永遠拿最新),失敗再用快取(離線時)
+// 網路優先:上網時每次都向伺服器確認(no-cache),離線時才用快取
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
-  e.respondWith(fetch(e.request).then((r) => { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, cp)); return r; }).catch(() => caches.match(e.request, { ignoreSearch: true })));
+  e.respondWith(fetch(e.request, { cache: 'no-cache' }).then((r) => { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, cp)); return r; }).catch(() => caches.match(e.request, { ignoreSearch: true })));
 });

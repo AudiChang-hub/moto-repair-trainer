@@ -549,5 +549,15 @@ APP.data.photos = {
   "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
   "page": "https://commons.wikimedia.org/wiki/File:Battery_Load_Tester.jpg",
   "title": "Battery Load Tester.jpg"
+ },
+ "cvt-rollers": {
+  "zh": "普利珠(滾子)— 示意圖",
+  "file": "cvt-rollers.svg",
+  "caption": "普利珠是一組 6 顆左右的圓柱形小滾子,外層耐磨塑膠、裡面包金屬,裝在前普利盤裡,轉速升高時被甩出去推動普利盤。新品正圓,磨損後會被磨出平面變扁。(本站繪製示意圖,實物照片請點「看更多實物照片」。)",
+  "author": "本站繪製",
+  "license": "示意圖(非實物照片)",
+  "license_url": "",
+  "page": "https://www.google.com/search?tbm=isch&q=%E6%99%AE%E5%88%A9%E7%8F%A0",
+  "q": "普利珠"
  }
 };
