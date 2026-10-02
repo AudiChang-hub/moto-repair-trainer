@@ -68,6 +68,12 @@
     main.append(h('h1', { style: { marginTop: '8px' } }, l.title), h('p', { class: 'muted' }, l.summary));
     const body = h('div', { class: 'lesson-body' }, l.blocks.map(renderBlock));
     main.append(body);
+    // 閱讀進度條
+    const bar = h('div', { class: 'read-progress', 'aria-hidden': 'true' });
+    document.body.append(bar);
+    const onScroll = () => { const el = document.scrollingElement; const max = el.scrollHeight - el.clientHeight; bar.style.transform = `scaleX(${max > 0 ? Math.min(1, el.scrollTop / max) : 0})`; };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+    APP.onLeave(() => { window.removeEventListener('scroll', onScroll); bar.remove(); });
 
     const quizBox = h('div', { class: 'card' });
     const startBtn = h('button', { class: 'btn primary', onclick: () => {

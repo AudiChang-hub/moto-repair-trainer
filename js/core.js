@@ -223,7 +223,7 @@
       container.innerHTML = '';
       const pct = Math.round((score / questions.length) * 100);
       container.append(h('div', { class: 'center' },
-        h('div', { class: 'score-ring' }, `${score} / ${questions.length}`),
+        (() => { const el = h('div', { class: 'score-ring', 'aria-label': `答對 ${score} / ${questions.length}` }, `0 / ${questions.length}`); let k = 0; const step = () => { el.textContent = `${k} / ${questions.length}`; if (k++ < score) setTimeout(step, 90); }; setTimeout(step, 150); return el; })(),
         h('p', null, pct >= 80 ? '🎉 很穩!這一章可以往下走了。' : pct >= 60 ? '👍 過關,但錯的題目建議回頭看一下。' : '📖 建議回去重讀教材,再測一次。'),
         h('p', { class: 'muted small' }, '答錯的題目都在「錯題本」裡,可以隨時重做。')));
       if (opts.onDone) opts.onDone(score, questions.length);
