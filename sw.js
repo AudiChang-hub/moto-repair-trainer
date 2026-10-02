@@ -1,5 +1,5 @@
 /* 自動產生:node tools/gen-sw.js ——請勿手改 */
-const CACHE = 'moto-trainer-202610020548';
+const CACHE = 'moto-trainer-202610020558';
 const FILES = [
  "./",
  ".nojekyll",
@@ -163,6 +163,7 @@ const FILES = [
  "js/data/procedures.js",
  "js/data/scenarios.js",
  "js/icons.js",
+ "js/scooter.js",
  "js/start.js",
  "js/version.js",
  "js/views/backup.js",

@@ -41,6 +41,11 @@
 
     function investigate() {
       root.innerHTML = '';
+      // 已查過的位置:查過 = checked,危險操作 = bad(蓋過 checked)
+      const baseStates = {};
+      ran.forEach((t) => { const z = t.g === '問診' ? null : APP.zoneOf(t.label); if (z && baseStates[z] !== 'bad') baseStates[z] = t.v === 'bad' ? 'bad' : 'checked'; });
+      const map = APP.scooter({ mode: sc.type === 'ev' ? 'ev' : 'ice', states: baseStates, compact: true, aria: '這台車的零件位置圖,會標出你檢查過的位置' });
+      const focusZone = (z) => map.set(z ? Object.assign({}, baseStates, { [z]: 'active' }) : baseStates);
       const side = h('div', { class: 'diag-side' });
       const mainCol = h('div');
       side.append(h('div', { class: 'card', style: { marginTop: 0 } },
@@ -48,6 +53,8 @@
         h('h2', { style: { marginTop: '10px' } }, sc.title),
         h('div', { class: 'muted small' }, '🛵 ' + sc.bike),
         h('div', { class: 'scene', html: '🗣️ ' + APP.rich(sc.customer) }),
+        h('div', { class: 'diag-map' }, h('div', { class: 'row spread small' }, h('strong', null, '檢查位置'), h('span', { class: 'muted' }, '滑到檢查項目上看位置')), map.el,
+          h('div', { class: 'map-legend' }, h('span', null, h('i', { class: 'lg-active' }), '正在看'), h('span', null, h('i', { class: 'lg-checked' }), '查過'), h('span', null, h('i', { class: 'lg-bad' }), '危險操作'))),
         h('div', { class: 'row spread' }, h('div', null, h('div', { class: 'muted small' }, '已花時間'), h('div', { class: 'clock' }, time + ' 分')), h('div', null, h('div', { class: 'muted small' }, '已做檢查'), h('div', { class: 'clock' }, ran.length))),
         h('div', { class: 'row mt' },
           h('button', { class: 'btn primary', onclick: diagnose }, '我要下診斷 →'),
@@ -67,8 +74,10 @@
         tests.forEach((t) => {
           const done = ran.includes(t);
           const card = h('div', { class: 'test' + (done ? ' done' : '') + (done && t.v === 'bad' ? ' danger' : '') });
+          const zone = t.g === '問診' ? null : APP.zoneOf(t.label);
+          if (zone) { card.addEventListener('mouseenter', () => focusZone(zone)); card.addEventListener('mouseleave', () => focusZone(null)); card.addEventListener('focusin', () => focusZone(zone)); card.addEventListener('focusout', () => focusZone(null)); }
           const btn = h('button', { disabled: !!done, onclick: () => { const y = window.scrollY; ran.push(t); time = minutesOf(ran); investigate(); window.scrollTo({ top: y }); } },
-            h('span', null, (done ? '✔ ' : '') + t.label), h('span', { class: 'pill gray' }, t.t + ' 分'));
+            h('span', null, (done ? '✔ ' : '') + t.label, zone ? h('small', { class: 'zone-tag' }, APP.scooterZones[zone][2]) : null), h('span', { class: 'pill gray' }, t.t + ' 分'));
           card.append(btn);
           if (done) card.append(h('div', { class: 'res', html: (t.v === 'bad' ? '⛔ ' : '📋 ') + APP.rich(t.r) }));
           grp.append(card);
@@ -135,7 +144,12 @@
         !fixOk ? h('p', { html: '建議做法:**' + APP.esc(sc.fixes.find((f) => f.ok).label) + '**' }) : null));
       root.append(h('div', { class: 'card' }, h('h3', { style: { marginTop: 0 } }, '📊 分數明細'),
         h('table', null, h('tbody', null, lines.map((l) => h('tr', null, h('td', null, l[0]), h('td', { style: { textAlign: 'right', color: l[1] < 0 ? 'var(--bad)' : 'inherit', fontWeight: 600 } }, (l[1] > 0 && l[0] !== '基本分' ? '+' : '') + l[1])))))));
+      const keyStates = {};
+      keys.forEach((k) => { const z = k.g === '問診' ? null : APP.zoneOf(k.label); if (!z) return; const st = ran.includes(k) ? 'checked' : 'missed'; if (keyStates[z] !== 'missed') keyStates[z] = st; });
+      bads.forEach((t) => { const z = APP.zoneOf(t.label); if (z && keyStates[z] !== 'missed') keyStates[z] = 'bad'; });
+      const resMap = APP.scooter({ mode: sc.type === 'ev' ? 'ev' : 'ice', states: keyStates, aria: '關鍵檢查位置:實心是你查到的,紅色虛線是漏掉的' });
       root.append(h('div', { class: 'card' }, h('h3', { style: { marginTop: 0 } }, '🧭 專家路徑(關鍵檢查)'),
+        h('div', { class: 'res-map' }, resMap.el, h('div', { class: 'map-legend' }, h('span', null, h('i', { class: 'lg-checked' }), '你查到的關鍵位置'), h('span', null, h('i', { class: 'lg-missed' }), '漏掉的關鍵位置'), h('span', null, h('i', { class: 'lg-bad' }), '危險操作'))),
         h('p', { class: 'muted small' }, `專家只需要約 ${expert} 分鐘、${keys.length} 項關鍵檢查;你花了 ${time} 分鐘、做了 ${ran.length} 項。`),
         h('ul', { class: 'tl' }, keys.map((k) => h('li', null, h('span', { class: 'pill ' + (ran.includes(k) ? 'ok' : 'bad') }, ran.includes(k) ? '有做' : '漏了'), h('div', null, h('div', null, k.label), h('div', { class: 'muted small', html: APP.rich(k.r) })))))));
       if (bads.length || wastes.length) {

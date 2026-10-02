@@ -34,16 +34,22 @@
     const total = D.lessons.length, done = D.lessons.filter((l) => APP.done.lesson(l.id)).length;
     main.append(h('div', { class: 'card' }, h('div', { class: 'row spread' }, h('strong', null, '整體進度'), h('span', { class: 'muted' }, `${done} / ${total} 章`)),
       h('div', { class: 'bar mt' }, h('i', { style: { width: Math.round((done / total) * 100) + '%' } }))));
+    const nextLesson = D.lessons.find((x) => !APP.done.lesson(x.id));
+    const route = h('ol', { class: 'route', 'aria-label': '學習路線' });
     D.stages.forEach((st) => {
-      main.append(h('div', { class: 'stage-title' }, h('div', { class: 'num' }, st.n), h('div', null, h('strong', null, st.title), h('div', { class: 'muted small' }, st.desc))));
-      D.lessons.filter((l) => l.stage === st.n).forEach((l) => {
-        const d = APP.done.lesson(l.id);
-        main.append(h('a', { class: 'lesson-item' + (d ? ' done' : ''), href: '#/learn/' + l.id },
-          h('div', { class: 'tick' }, d ? '✓' : ''),
-          h('div', { style: { flex: 1 } }, h('div', null, h('strong', null, l.title)), h('div', { class: 'muted small' }, l.summary)),
-          h('span', { class: 'pill gray' }, l.min + ' 分')));
-      });
+      const ls = D.lessons.filter((l) => l.stage === st.n);
+      const dn = ls.filter((l) => APP.done.lesson(l.id)).length;
+      route.append(h('li', { class: 'route-stage' + (dn === ls.length ? ' done' : '') },
+        h('div', { class: 'stage-sign' }, h('span', { class: 'num' }, String(st.n).padStart(2, '0')), h('div', null, h('strong', null, st.title), h('div', { class: 'muted small' }, st.desc)), h('span', { class: 'pill' + (dn === ls.length ? ' ok' : ' gray') }, `${dn}/${ls.length}`)),
+        h('ol', { class: 'route-stops' }, ls.map((l) => {
+          const d = APP.done.lesson(l.id), isNext = nextLesson && nextLesson.id === l.id;
+          return h('li', { class: 'stop' + (d ? ' done' : '') + (isNext ? ' next' : '') },
+            h('a', { class: 'lesson-item', href: '#/learn/' + l.id, 'aria-current': isNext ? 'step' : null },
+              h('div', { style: { flex: 1 } }, h('div', { class: 'row', style: { gap: '8px' } }, h('strong', null, l.title), isNext ? h('span', { class: 'pill' }, '下一站') : null), h('div', { class: 'muted small' }, l.summary)),
+              h('span', { class: 'pill gray' }, l.min + ' 分'), h('span', { class: 'sr-only' }, d ? '(已完成)' : '')));
+        }))));
     });
+    main.append(route);
     main.append(h('div', { class: 'card mt' }, h('div', { class: 'row spread' }, h('div', null, h('strong', null, '📝 綜合測驗'), h('div', { class: 'muted small' }, '從所有章節隨機抽 10 題,檢驗整體吸收程度。' + (S.exam ? `(最佳:${S.exam.best} / 10)` : ''))), h('a', { class: 'btn primary', href: '#/learn/exam' }, '開始'))));
   }
 
@@ -59,13 +65,46 @@
     });
   }
 
+  // 各章對應的零件位置(藍圖速克達要亮的地方)
+  const LESSON_ZONES = {
+    'big-picture': { z: ['engine', 'cvt', 'front-brake', 'battery'] },
+    'four-stroke': { z: ['engine', 'plug'] },
+    'fuel-injection': { z: ['intake', 'fuel', 'plug'] },
+    'cvt': { z: ['cvt'] },
+    'brakes-tires': { z: ['front-brake', 'rear-brake', 'front-tire'] },
+    'electrical-basics': { z: ['battery', 'fuse', 'headlight'] },
+    'maintenance-map': { z: ['engine', 'cvt', 'front-brake', 'battery', 'front-tire'] },
+    'no-start': { z: ['battery', 'fuel', 'plug'] },
+    'multimeter-basics': { z: ['battery', 'fuse'] },
+    'charging-system': { z: ['charging', 'battery'] },
+    'wiring-faults': { z: ['fuse', 'headlight', 'dash'] },
+    'ev-architecture': { mode: 'ev', z: ['ev-battery', 'controller', 'hubmotor', 'chargeport'] },
+    'ev-safety': { mode: 'ev', z: ['ev-battery', 'chargeport'] },
+    'ev-diagnosis': { mode: 'ev', z: ['stand', 'hubmotor', 'ev-battery'] },
+  };
+  const LESSON_ICON = { 'safety-basics': 'shield-check', 'tools-units': 'wrench', 'diagnosis-method': 'search', 'symptoms': 'list-checks' };
+
   function lesson(main, id) {
     const idx = D.lessons.findIndex((l) => l.id === id);
     if (idx < 0) return list(main);
     const l = D.lessons[idx];
     main.append(h('p', null, h('a', { href: '#/learn' }, '← 學習地圖')));
-    main.append(h('div', { class: 'row' }, h('span', { class: 'pill' }, `第 ${l.stage} 階段:${D.stages[l.stage].title}`), h('span', { class: 'pill gray' }, `約 ${l.min} 分鐘`)));
-    main.append(h('h1', { style: { marginTop: '8px' } }, l.title), h('p', { class: 'muted' }, l.summary));
+    // 章節主視覺:講到車上的哪裡,就在藍圖速克達上亮哪裡;沒有特定零件的章節用大圖示
+    const zones = LESSON_ZONES[l.id];
+    const art = zones ? APP.scooter({ mode: zones.mode || 'ice', states: Object.fromEntries(zones.z.map((z) => [z, 'lesson'])), aria: '本章介紹的零件位置' }).el
+      : h('div', { class: 'stage-art', 'aria-hidden': 'true' }, APP.icon(LESSON_ICON[l.id] || 'book-open', 112), h('span', null, 'STAGE 0' + l.stage));
+    const nextIdx = idx + 1 < D.lessons.length ? D.lessons[idx + 1] : null;
+    main.append(h('header', { class: 'lesson-hero' },
+      h('div', null,
+        h('span', { class: 'eyebrow' }, `第 ${l.stage} 階段 · ${D.stages[l.stage].title}`),
+        h('h1', { style: { margin: '.35em 0 .3em' } }, l.title),
+        h('p', { class: 'lead', style: { margin: 0 } }, l.summary),
+        h('div', { class: 'row', style: { marginTop: '16px' } },
+          h('span', { class: 'pill gray' }, APP.icon('timer', 14), `約 ${l.min} 分鐘`),
+          h('span', { class: 'pill gray' }, APP.icon('clipboard-list', 14), `小測驗 ${l.quiz.length} 題`),
+          APP.done.lesson(l.id) ? h('span', { class: 'pill ok' }, APP.icon('check', 14), '已完成') : null,
+          h('span', { class: 'muted small' }, `第 ${idx + 1} / ${D.lessons.length} 章`))),
+      h('div', { class: 'lesson-art' }, art)));
     const body = h('div', { class: 'lesson-body' }, l.blocks.map(renderBlock));
     main.append(body);
     // 閱讀進度條

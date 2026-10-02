@@ -16,6 +16,8 @@
     })));
   }
 
+  const PROC_ZONES = { 'oil-change': ['engine'], 'spark-plug': ['plug'], 'brake-pads': ['front-brake'], 'cvt-service': ['cvt'], 'battery-swap': ['battery'], 'ev-power-down': ['ev-battery'] };
+
   function play(main, p) {
     const root = h('div');
     main.append(h('p', null, h('a', { href: '#/proc' }, '← 流程演練')), root);
@@ -23,10 +25,24 @@
 
     function intro() {
       root.innerHTML = '';
-      root.append(h('h1', null, p.title), h('div', { class: 'row' }, h('span', { class: 'pill' + (p.type === 'ev' ? ' info' : '') }, typeLabel[p.type]), h('span', { class: 'pill gray' }, '⏱ ' + p.time), h('span', { class: 'pill gray' }, p.steps.length + ' 步')),
-        h('p', { class: 'muted' }, p.intro),
-        p.type === 'ev' ? h('div', { class: 'callout warn' }, h('div', { class: 'ttl' }, '⚠️ 高壓安全'), h('p', null, '這是「外部安全程序」的練習,不是教你拆電池包。請先讀過「電動機車安全作業」那一章。')) : null,
-        h('button', { class: 'btn primary', onclick: prep }, '開始 →'));
+      const z = PROC_ZONES[p.id];
+      const art = z ? APP.scooter({ mode: p.type === 'ev' ? 'ev' : 'ice', states: Object.fromEntries(z.map((k) => [k, 'lesson'])), aria: '這個流程作業的位置' }).el : null;
+      root.append(...[h('header', { class: 'lesson-hero' },
+        h('div', null,
+          h('span', { class: 'eyebrow' }, '流程演練 · ' + typeLabel[p.type]),
+          h('h1', { style: { margin: '.35em 0 .3em' } }, p.title),
+          h('p', { class: 'lead', style: { margin: 0 } }, p.intro),
+          h('div', { class: 'row', style: { marginTop: '16px' } }, h('span', { class: 'pill gray' }, APP.icon('timer', 14), p.time), h('span', { class: 'pill gray' }, APP.icon('list-checks', 14), (p.steps.length + 1) + ' 步(含備料)'), h('span', { class: 'muted small' }, '難度 ', stars(p.level))),
+          h('div', { class: 'row', style: { marginTop: '20px' } }, h('button', { class: 'btn primary lg', type: 'button', onclick: prep }, APP.icon('play', 20), '開始演練'))),
+        art ? h('div', { class: 'lesson-art' }, art) : null),
+        p.type === 'ev' ? h('div', { class: 'callout warn' }, h('div', { class: 'ttl' }, '⚠️ 高壓安全'), h('p', null, '這是「外部安全程序」的練習,不是教你拆電池包。請先讀過「電動機車安全作業」那一章。')) : null].filter(Boolean));
+    }
+
+    // 步驟進度條:備料 + 每一步
+    function stepper(cur) {
+      const names = ['備料'].concat(p.steps.map((x) => x.title));
+      return h('ol', { class: 'stepper', 'aria-label': `進度:第 ${cur + 1} / ${names.length} 步` }, names.map((n, k) =>
+        h('li', { class: k < cur ? 'done' : k === cur ? 'cur' : '', title: n, 'aria-current': k === cur ? 'step' : null }, h('span', { class: 'dot' }, k < cur ? APP.icon('check', 13) : String(k)), h('span', { class: 'lbl' }, n))));
     }
 
     function prep() {
@@ -58,7 +74,7 @@
         fb.append(h('div', { class: 'mt' }, h('button', { class: 'btn primary', onclick: () => step(0) }, '進入作業步驟 →')));
         confirmBtn.disabled = true;
       } }, '確認備料');
-      root.append(h('h2', { style: { marginTop: 0 } }, '🧰 第 0 步:備料'), h('p', null, p.prep.prompt), h('div', null, chips), h('div', { class: 'mt' }, confirmBtn), fb);
+      root.append(stepper(0), h('h2', { style: { marginTop: 0 } }, '🧰 第 0 步:備料'), h('p', null, p.prep.prompt), h('div', null, chips), h('div', { class: 'mt' }, confirmBtn), fb);
     }
 
     function step(i) {
@@ -67,7 +83,7 @@
       let tried = false, solved = false;
       const fb = h('div');
       root.append(h('div', { class: 'row spread' }, h('span', { class: 'step-no' }, `步驟 ${i + 1} / ${p.steps.length}`), h('span', { class: 'muted small' }, `首次答對 ${firstTryOk} 步`)),
-        h('div', { class: 'bar', style: { margin: '8px 0 14px' } }, h('i', { style: { width: (i / p.steps.length) * 100 + '%' } })),
+        stepper(i + 1),
         h('h2', { style: { marginTop: 0 } }, s.title), h('div', { class: 'scene', html: '🔎 ' + APP.rich(s.scene) }), h('h3', { html: APP.rich(s.q) }));
       const btns = APP.shuffle(s.options).map((o) => h('button', { class: 'opt', html: APP.rich(o.t), onclick: function () {
         if (solved) return;
