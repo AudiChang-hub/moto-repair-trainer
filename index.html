@@ -2,45 +2,60 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>機車維修訓練場</title>
+<meta name="description" content="給零基礎者的機車維修訓練場:燃油與電動機車的互動教材、診斷模擬、電表實驗室、流程演練,以及機車修護丙級/乙級官方學科題庫與白話解析。可離線使用。">
+<meta property="og:title" content="機車維修訓練場">
+<meta property="og:description" content="從零開始學修機車:互動診斷、虛擬三用電表、丙/乙級題庫白話解析,燃油與電動機車都有。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/icon.png">
+<meta name="theme-color" content="#c2410c" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1013" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#d9480f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="維修訓練場">
-<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/icon.png">
+<script>
+  // 在畫面出現前套用使用者選的深淺色,避免閃一下
+  try { var t = (JSON.parse(localStorage.getItem('moto-sim-v1') || '{}').theme); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<a class="skip" href="#main">跳到主要內容</a>
 <div id="app">
-  <aside id="nav" aria-label="主選單"></aside>
-  <main id="main"></main>
+  <nav id="nav" aria-label="主選單"></nav>
+  <main id="main" tabindex="-1">
+    <div class="boot"><div><img src="assets/icon-192.png" alt="" width="64" height="64"><p>機車維修訓練場 載入中…</p></div></div>
+  </main>
 </div>
+<nav id="tabbar" aria-label="快速選單"></nav>
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script src="js/core.js"></script>
-<script src="js/version.js"></script>
-<script src="js/data/lessons.js"></script>
-<script src="js/data/scenarios.js"></script>
-<script src="js/data/procedures.js"></script>
-<script src="js/data/labs.js"></script>
-<script src="js/data/glossary.js"></script>
-<script src="js/data/parts.js"></script>
-<script src="js/data/plan.js"></script>
-<script src="js/data/photos.js"></script>
-<script src="js/data/photomap.js"></script>
-<script src="js/widgets.js"></script>
-<script src="js/views/home.js"></script>
-<script src="js/views/learn.js"></script>
-<script src="js/views/diagnose.js"></script>
-<script src="js/views/procedure.js"></script>
-<script src="js/views/lab.js"></script>
-<script src="js/views/misc.js"></script>
-<script src="js/views/cert.js"></script>
-<script src="js/views/brands.js"></script>
-<script src="js/views/gallery.js"></script>
-<script src="js/views/backup.js"></script>
-<script>APP.start();</script>
+<script defer src="js/core.js"></script>
+<script defer src="js/icons.js"></script>
+<script defer src="js/version.js"></script>
+<script defer src="js/data/lessons.js"></script>
+<script defer src="js/data/scenarios.js"></script>
+<script defer src="js/data/procedures.js"></script>
+<script defer src="js/data/labs.js"></script>
+<script defer src="js/data/glossary.js"></script>
+<script defer src="js/data/parts.js"></script>
+<script defer src="js/data/plan.js"></script>
+<script defer src="js/data/photos.js"></script>
+<script defer src="js/data/photomap.js"></script>
+<script defer src="js/widgets.js"></script>
+<script defer src="js/views/home.js"></script>
+<script defer src="js/views/learn.js"></script>
+<script defer src="js/views/diagnose.js"></script>
+<script defer src="js/views/procedure.js"></script>
+<script defer src="js/views/lab.js"></script>
+<script defer src="js/views/misc.js"></script>
+<script defer src="js/views/cert.js"></script>
+<script defer src="js/views/brands.js"></script>
+<script defer src="js/views/gallery.js"></script>
+<script defer src="js/views/backup.js"></script>
+<script defer src="js/start.js"></script>
 </body>
 </html>

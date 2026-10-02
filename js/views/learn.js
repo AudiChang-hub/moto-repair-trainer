@@ -30,7 +30,7 @@
   APP.markVisual = markVisual;
 
   function list(main) {
-    main.append(h('h1', null, '🗺️ 學習地圖'), h('p', { class: 'muted' }, '按階段由淺入深。每章約 10–15 分鐘,最後有小測驗。你也可以跳著看,但建議第 0、1 階段先走完。'));
+    main.append(APP.head('map', '學習地圖'), h('p', { class: 'muted' }, '按階段由淺入深。每章約 10–15 分鐘,最後有小測驗。你也可以跳著看,但建議第 0、1 階段先走完。'));
     const total = D.lessons.length, done = D.lessons.filter((l) => APP.done.lesson(l.id)).length;
     main.append(h('div', { class: 'card' }, h('div', { class: 'row spread' }, h('strong', null, '整體進度'), h('span', { class: 'muted' }, `${done} / ${total} 章`)),
       h('div', { class: 'bar mt' }, h('i', { style: { width: Math.round((done / total) * 100) + '%' } }))));
@@ -48,7 +48,7 @@
   }
 
   function exam(main) {
-    main.append(h('p', null, h('a', { href: '#/learn' }, '← 學習地圖')), h('h1', null, '📝 綜合測驗'));
+    main.append(h('p', null, h('a', { href: '#/learn' }, '← 學習地圖')), APP.head('clipboard-list', '綜合測驗'));
     const pool = D.lessons.flatMap((l) => l.quiz.map((q) => Object.assign({ src: l.title }, q)));
     const qs = APP.shuffle(pool).slice(0, 10);
     const box = h('div', { class: 'card' });

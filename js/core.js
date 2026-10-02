@@ -29,7 +29,7 @@
   APP.boldify = function (root) {
     const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
     const hit = [];
-    while (w.nextNode()) if (w.currentNode.nodeValue.includes('**')) hit.push(w.currentNode);
+    while (w.nextNode()) { const n = w.currentNode; if (n.nodeValue.includes('**') && /\*\*[^*]+\*\*/.test(n.nodeValue) && !(n.parentElement && n.parentElement.closest('textarea,script,style,svg'))) hit.push(n); }
     hit.forEach((n) => {
       const frag = document.createDocumentFragment();
       n.nodeValue.split('**').forEach((part, i) => { if (!part) return; if (i % 2) { const b = document.createElement('strong'); b.textContent = part; frag.append(b); } else frag.append(part); });
@@ -117,6 +117,45 @@
     return h('img', { class: 'thumb', src: APP.photoUrl(id), alt: p.zh, loading: 'lazy', title: p.zh + '(點一下放大)', onclick: (e) => { e.stopPropagation(); APP.lightbox(id); } });
   };
 
+  // 難度格(1~3)
+  APP.diff = (n) => h('span', { class: 'diff', role: 'img', 'aria-label': `難度 ${n} / 3` }, [1, 2, 3].map((k) => h('i', { class: k <= n ? 'on' : '' })));
+  // 頁面標題:線條圖示 + 標題
+  APP.head = (ico, title) => h('h1', { class: 'page-title' }, h('span', { class: 'pt-ico', 'aria-hidden': 'true' }, APP.icon(ico, 24)), title);
+
+
+  /* ---------- emoji → 線條圖示(全站風格統一) ---------- */
+  const EMO = {
+    '⚠️': 'triangle-alert', '⚠': 'triangle-alert', '💡': 'lightbulb', '📌': 'target', '✅': 'circle-check', '❌': 'circle-x', '✔': 'check',
+    '🧭': 'route', '📋': 'clipboard-list', '🛵': 'bike', '🗣️': 'info', '📖': 'book-open', '🔎': 'search', '🔍': 'search', '🧪': 'clipboard-list',
+    '🖨️': 'printer', '🧰': 'wrench', '🎯': 'target', '📝': 'clipboard-list', '📕': 'notebook-pen', '⭐': 'star', '🖼️': 'image',
+    '🔧': 'wrench', '📏': 'ruler', '⚙️': 'cog', '🛞': 'disc-3', '🔌': 'cable', '🔋': 'battery-charging', '📷': 'camera', '✏️': 'notebook-pen',
+    '🩺': 'clipboard-list', '📊': 'gauge', '🏆': 'trophy', '👍': 'circle-check', '💪': 'flame', '🎉': 'sparkles', '👆': 'info', '😵': 'circle-x',
+    '🤔': 'info', '😎': 'circle-check', '💥': 'zap', '⛔': 'circle-x', '📦': 'archive', '🗺️': 'map', '🛠️': 'hammer', '📅': 'calendar-days',
+    '🔗': 'route', '🆚': 'list-checks', '⬇': 'download', '↻': 'rotate-ccw', '🏷️': 'tag', '🎓': 'graduation-cap', '⚡': 'zap', '🎞️': 'film',
+    '🏍️': 'bike', '🃏': 'layers', '🌉': 'route', '🔄': 'rotate-ccw', '📈': 'gauge', '🚀': 'arrow-right',
+  };
+  // \u9019\u4E9B emoji \u90FD\u4E0D\u542B\u6B63\u5247\u7279\u6B8A\u5B57\u5143,\u76F4\u63A5\u4E32\u8D77\u4F86\u5373\u53EF;\u5F8C\u9762\u53EF\u5E36 U+FE0F \u8207\u4E00\u500B\u7A7A\u767D
+  const EMO_RE = new RegExp('(' + Object.keys(EMO).sort((a, b) => b.length - a.length).join('|') + ')\\uFE0F?\\s?', 'gu');
+  const EMO_TEST = new RegExp(EMO_RE.source, 'u');
+  APP.iconify = function (root) {
+    if (!root || root.closest && root.closest('svg,.lcd,textarea,input')) return;
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement && n.parentElement.closest('svg,.lcd,textarea,script,style,option') ? NodeFilter.FILTER_REJECT : EMO_TEST.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP) });
+    const hits = []; while (w.nextNode()) hits.push(w.currentNode);
+    hits.forEach((n) => {
+      EMO_RE.lastIndex = 0;
+      const frag = document.createDocumentFragment(); let last = 0, m;
+      const txt = n.nodeValue;
+      while ((m = EMO_RE.exec(txt))) {
+        if (m.index > last) frag.append(txt.slice(last, m.index));
+        const ic = APP.icon(EMO[m[1]], 18); ic.classList.add('emo');
+        frag.append(ic, m[0].endsWith(' ') ? ' ' : '');
+        last = m.index + m[0].length;
+      }
+      if (last < txt.length) frag.append(txt.slice(last));
+      n.replaceWith(frag);
+    });
+  };
+
   /* ---------- 進度查詢 ---------- */
   APP.done = {
     lesson: (id) => !!(S.lessons[id] && S.lessons[id].done),
@@ -193,29 +232,70 @@
   };
 
   /* ---------- 導覽與路由 ---------- */
+  // [id, 圖示, 名稱, 分組]
   const NAV = [
-    ['home', '🏠', '今日任務'],
-    ['learn', '🗺️', '學習地圖'],
-    ['cert', '🎓', '考照練習'],
-    ['brands', '🏷️', '車款專區'],
-    ['diagnose', '🔍', '診斷實戰'],
-    ['proc', '🔧', '流程演練'],
-    ['lab', '⚡', '電表實驗室'],
-    ['visual', '🎞️', '動畫圖解'],
-    ['gallery', '📷', '工具零件圖鑑'],
-    ['parts', '🏍️', '零件地圖'],
-    ['cards', '🃏', '術語閃卡'],
-    ['mistakes', '📕', '錯題本'],
-    ['bridge', '🌉', '走向實車'],
+    ['home', 'house', '今日任務', '開始'],
+    ['learn', 'map', '學習地圖', '學習'],
+    ['visual', 'film', '動畫圖解', '學習'],
+    ['gallery', 'camera', '工具零件圖鑑', '學習'],
+    ['parts', 'bike', '零件地圖', '學習'],
+    ['cards', 'layers', '術語閃卡', '學習'],
+    ['cert', 'graduation-cap', '考照練習', '練習'],
+    ['diagnose', 'search', '診斷實戰', '練習'],
+    ['proc', 'wrench', '流程演練', '練習'],
+    ['lab', 'zap', '電表實驗室', '練習'],
+    ['brands', 'tag', '車款專區', '店務'],
+    ['mistakes', 'notebook-pen', '錯題本', '店務'],
+    ['bridge', 'route', '走向實車', '店務'],
   ];
+  const ALIAS = { sop: 'proc', plan: 'home' };
+  APP.NAV = NAV;
+
+  // 深淺色:system / light / dark
+  APP.setTheme = function (t) {
+    S.theme = t; APP.save();
+    if (t === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+    document.querySelectorAll('.theme-switch button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.t === t)));
+  };
+
   function buildNav() {
     const nav = document.getElementById('nav');
     nav.innerHTML = '';
-    nav.append(h('div', { class: 'brand' }, h('img', { src: 'assets/icon.png', alt: '', style: { width: '34px', height: '34px', borderRadius: '9px' } }), '機車維修訓練場'));
-    NAV.forEach(([id, ico, label]) => nav.append(h('a', { class: 'nav-item', href: '#/' + id, 'data-id': id }, h('span', { class: 'nav-ico' }, ico), label)));
-    nav.append(h('div', { class: 'nav-foot' }, '進度存在這台電腦的瀏覽器裡。', h('br'), '版本 ' + (APP.version || '本機'), h('br'), h('a', { href: '#/backup' }, '📦 備份 / 換裝置'), h('br'), h('a', { href: '#', onclick: (e) => { e.preventDefault(); APP.resetAll(); } }, '清除全部進度')));
+    nav.append(h('a', { class: 'brand', href: '#/home', 'aria-label': '機車維修訓練場 首頁' }, h('img', { src: 'assets/icon-192.png', alt: '', width: 40, height: 40 }), h('div', null, h('b', null, '機車維修訓練場'), h('small', null, 'MOTO REPAIR TRAINER'))));
+    let group = '';
+    NAV.forEach(([id, ico, label, g]) => {
+      if (g !== group) { group = g; nav.append(h('div', { class: 'nav-group' }, g)); }
+      nav.append(h('a', { class: 'nav-item', href: '#/' + id, 'data-id': id }, APP.icon(ico, 19), label));
+    });
+    const sw = h('div', { class: 'theme-switch', role: 'group', 'aria-label': '顯示模式' },
+      [['system', 'monitor', '跟隨系統'], ['light', 'sun', '淺色'], ['dark', 'moon', '深色']].map(([t, ic, lb]) =>
+        h('button', { type: 'button', 'data-t': t, 'aria-pressed': String((S.theme || 'system') === t), 'aria-label': lb, title: lb, onclick: () => APP.setTheme(t) }, APP.icon(ic, 16))));
+    nav.append(h('div', { class: 'nav-foot' }, sw,
+      h('div', null, '進度存在這台裝置的瀏覽器裡'), h('div', null, '版本 ' + (APP.version || '本機')),
+      h('div', { class: 'row', style: { gap: '12px', marginTop: '6px' } }, h('a', { href: '#/backup' }, '備份 / 換裝置'), h('a', { href: '#', onclick: (e) => { e.preventDefault(); APP.resetAll(); } }, '清除進度'))));
+
+    // 手機底部導覽:4 個常用 + 更多
+    const tab = document.getElementById('tabbar');
+    tab.innerHTML = '';
+    [['home', 'house', '首頁'], ['learn', 'map', '學習'], ['cert', 'graduation-cap', '考照'], ['diagnose', 'search', '診斷']].forEach(([id, ic, lb]) =>
+      tab.append(h('a', { href: '#/' + id, 'data-id': id }, APP.icon(ic, 22), lb)));
+    tab.append(h('button', { type: 'button', 'aria-haspopup': 'dialog', onclick: openMore }, APP.icon('menu', 22), '更多'));
   }
 
+  function openMore() {
+    const close = () => { sheet.remove(); document.removeEventListener('keydown', esc); };
+    const esc = (e) => { if (e.key === 'Escape') close(); };
+    const sheet = h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': '所有功能', onclick: (e) => { if (e.target === sheet) close(); } },
+      h('div', { class: 'sheet-box' }, h('div', { class: 'grab' }),
+        h('div', { class: 'sheet-grid' }, [...NAV.map(([id, ic, lb]) => [id, ic, lb]), ['backup', 'archive', '備份/換裝置']].map(([id, ic, lb]) =>
+          h('a', { href: '#/' + id, onclick: close }, APP.icon(ic, 24), lb))),
+        h('div', { class: 'theme-switch', style: { marginTop: '16px' } }, [['system', 'monitor', '跟隨系統'], ['light', 'sun', '淺色'], ['dark', 'moon', '深色']].map(([t, ic, lb]) =>
+          h('button', { type: 'button', 'data-t': t, 'aria-pressed': String((S.theme || 'system') === t), onclick: () => APP.setTheme(t) }, APP.icon(ic, 16), ' ', lb)))));
+    document.body.append(sheet); document.addEventListener('keydown', esc);
+    const first = sheet.querySelector('a'); if (first) first.focus();
+  }
+
+  let firstRoute = true;
   function route() {
     APP.cleanups.forEach((fn) => { try { fn(); } catch (e) { /* ignore */ } });
     APP.cleanups = [];
@@ -223,19 +303,32 @@
     const [name, ...params] = hash.split('/');
     const main = document.getElementById('main');
     main.innerHTML = '';
+    main.classList.remove('enter'); void main.offsetWidth; main.classList.add('enter');
     window.scrollTo(0, 0);
     const view = APP.views[name] || APP.views.home;
-    document.querySelectorAll('#nav a.nav-item').forEach((a) => a.classList.toggle('active', a.dataset.id === (APP.views[name] ? name : 'home')));
+    const cur = APP.views[name] ? (ALIAS[name] || name) : 'home';
+    document.querySelectorAll('#nav a.nav-item, #tabbar a').forEach((a) => {
+      const on = a.dataset.id === cur;
+      a.classList.toggle('active', on);
+      if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    const item = NAV.find((n) => n[0] === cur);
+    document.title = (item && cur !== 'home' ? item[2] + ' · ' : '') + '機車維修訓練場';
     try {
       view(main, params.map(decodeURIComponent));
     } catch (e) {
       console.error(e);
       main.append(h('div', { class: 'callout warn' }, '這個頁面載入時發生錯誤:' + e.message));
     }
+    // 換頁後把焦點移到內容(螢幕閱讀器與鍵盤使用者),第一次載入不搶焦點
+    if (!firstRoute) main.focus({ preventScroll: true });
+    firstRoute = false;
   }
 
   APP.start = function () {
     buildNav();
+    // 任何新渲染的內容都自動把 emoji 換成線條圖示
+    new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => { const el = n.nodeType === 1 ? n : n.parentElement; if (!el || !el.isConnected) return; APP.boldify(el); APP.iconify(el); }))).observe(document.body, { childList: true, subtree: true });
     window.addEventListener('hashchange', route);
     route();
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {

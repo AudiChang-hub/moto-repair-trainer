@@ -29,7 +29,7 @@
   }
 
   APP.views.backup = function (main) {
-    main.append(h('h1', null, '📦 備份 / 換裝置'),
+    main.append(APP.head('archive', '備份 / 換裝置'),
       h('p', { class: 'muted' }, '你的學習進度(已讀章節、題庫作答紀錄、錯題本…)只存在「這個瀏覽器」。換手機、換平板、換電腦,進度不會自動跟過去。用下面的方法搬過去即可,不需要任何帳號或網路服務。'));
     const box = h('textarea', { rows: 3, style: { width: '100%', marginTop: '10px', display: 'none' } });
     const stats = `${Object.keys(S.lessons).length} 章教材 · ${Object.keys(S.bank || {}).length} 題考照作答紀錄 · ${S.mistakes.length} 筆錯題`;

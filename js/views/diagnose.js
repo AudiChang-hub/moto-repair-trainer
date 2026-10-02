@@ -2,12 +2,12 @@
 (function () {
   const { h, S } = APP, D = APP.data;
   const GROUPS = ['問診', '觀察', '基本檢查', '量測', '進階檢查'];
-  const stars = (n) => '★'.repeat(n) + '☆'.repeat(3 - n);
+  const stars = (n) => APP.diff(n);
   const typeLabel = { ice: '燃油機車', ev: '電動機車' };
   const vLabel = { key: ['關鍵檢查', 'ok'], ok: ['合理檢查', 'info'], waste: ['浪費時間', 'warn'], bad: ['危險/錯誤操作', 'bad'] };
 
   function list(main) {
-    main.append(h('h1', null, '🔍 診斷實戰'), h('p', { class: 'muted' }, '客戶開著車進來,你是師傅。你決定要做哪些檢查、花多少時間,最後下診斷。**跟真實一樣:每個檢查都花時間,有些會浪費,有些很危險。**'));
+    main.append(APP.head('search', '診斷實戰'), h('p', { class: 'muted' }, '客戶開著車進來,你是師傅。你決定要做哪些檢查、花多少時間,最後下診斷。**跟真實一樣:每個檢查都花時間,有些會浪費,有些很危險。**'));
     main.append(h('div', { class: 'callout' }, h('div', { class: 'ttl' }, '怎麼評分?'),
       h('ul', null, h('li', null, '找對原因、選對修法'), h('li', null, '有做到「關鍵檢查」(不是憑運氣猜對)'), h('li', null, '少做浪費的檢查、不要做危險操作、少用提示'))));
     let filter = 'all';
@@ -21,7 +21,7 @@
       box.append(h('div', { class: 'grid auto' }, items.map((s) => {
         const rec = S.scenarios[s.id];
         return h('a', { class: 'card', href: '#/diagnose/' + s.id, style: { margin: 0, textDecoration: 'none', color: 'inherit' } },
-          h('div', { class: 'row spread' }, h('span', { class: 'pill' + (s.type === 'ev' ? ' info' : '') }, typeLabel[s.type]), h('span', { class: 'muted small' }, '難度 ' + stars(s.level))),
+          h('div', { class: 'row spread' }, h('span', { class: 'pill' + (s.type === 'ev' ? ' info' : '') }, typeLabel[s.type]), h('span', { class: 'muted small' }, '難度 ', stars(s.level))),
           h('h3', { style: { marginTop: '10px' } }, s.title),
           h('div', { class: 'muted small' }, s.bike),
           h('div', { class: 'mt' }, rec && rec.best != null ? h('span', { class: 'pill ok' }, `最佳 ${rec.best} 分 · 練習 ${rec.attempts} 次`) : h('span', { class: 'pill gray' }, '尚未挑戰')));
@@ -44,7 +44,7 @@
       const side = h('div', { class: 'diag-side' });
       const mainCol = h('div');
       side.append(h('div', { class: 'card', style: { marginTop: 0 } },
-        h('div', { class: 'row' }, h('span', { class: 'pill' + (sc.type === 'ev' ? ' info' : '') }, typeLabel[sc.type]), h('span', { class: 'muted small' }, '難度 ' + stars(sc.level))),
+        h('div', { class: 'row' }, h('span', { class: 'pill' + (sc.type === 'ev' ? ' info' : '') }, typeLabel[sc.type]), h('span', { class: 'muted small' }, '難度 ', stars(sc.level))),
         h('h2', { style: { marginTop: '10px' } }, sc.title),
         h('div', { class: 'muted small' }, '🛵 ' + sc.bike),
         h('div', { class: 'scene', html: '🗣️ ' + APP.rich(sc.customer) }),
@@ -90,7 +90,7 @@
         row.querySelector('input').onchange = () => { row.parentElement.querySelectorAll('.choice').forEach((c) => c.classList.remove('sel')); row.classList.add('sel'); onPick(o); sync(); };
         return row;
       });
-      root.append(h('h1', null, '🩺 下診斷'),
+      root.append(APP.head('clipboard-list', '下診斷'),
         h('div', { class: 'card' }, h('strong', null, '你的檢查紀錄(' + ran.length + ' 項,共 ' + time + ' 分)'),
           ran.length ? h('ul', { class: 'tl' }, ran.map((t) => h('li', null, h('span', { class: 'pill gray' }, t.g), h('div', null, h('div', null, t.label), h('div', { class: 'muted small', html: APP.rich(t.r) }))))) : h('p', { class: 'muted' }, '你還沒有做任何檢查,等於憑感覺下診斷。')),
         h('div', { class: 'card' }, h('h3', { style: { marginTop: 0 } }, '① 根本原因是?'), radios(causes, 'cause', (o) => o.label, (o) => (cause = o))),

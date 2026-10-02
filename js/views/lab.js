@@ -1,7 +1,7 @@
 /* 電表實驗室:虛擬三用電表 */
 (function () {
   const { h, S } = APP, D = APP.data;
-  const stars = (n) => '★'.repeat(n) + '☆'.repeat(3 - n);
+  const stars = (n) => APP.diff(n);
   const MODES = [
     ['off', 'OFF', 'OFF'], ['dc', 'V⎓', '直流電壓'], ['ac', 'V∼', '交流電壓'],
     ['ohm', 'Ω', '電阻'], ['cont', '🔔', '通斷'], ['amp', 'A', '電流'],
@@ -17,10 +17,10 @@
   }
 
   function list(main) {
-    main.append(h('h1', null, '⚡ 電表實驗室'), h('p', { class: 'muted' }, '這裡有一支虛擬三用電表。**選檔位 → 點電路圖上的兩個測試點(先紅棒、再黑棒)→ 讀數字。** 每次進入實驗室,系統都會偷偷藏一個故障,你要用電表找出來。'));
+    main.append(APP.head('zap', '電表實驗室'), h('p', { class: 'muted' }, '這裡有一支虛擬三用電表。**選檔位 → 點電路圖上的兩個測試點(先紅棒、再黑棒)→ 讀數字。** 每次進入實驗室,系統都會偷偷藏一個故障,你要用電表找出來。'));
     main.append(h('div', { class: 'callout warn' }, h('div', { class: 'ttl' }, '真實的後果'), h('p', null, '檔位選錯會有後果:在通電時量電阻讀數無意義、在電瓶兩端用「電流檔」= 短路燒保險絲。這裡讓你**安全地犯錯**。')));
     main.append(h('div', { class: 'grid auto' }, D.labs.map((l) => h('a', { class: 'card', href: '#/lab/' + l.id, style: { margin: 0, textDecoration: 'none', color: 'inherit' } },
-      h('div', { class: 'row spread' }, h('span', { class: 'pill' }, '實驗'), h('span', { class: 'muted small' }, '難度 ' + stars(l.level))),
+      h('div', { class: 'row spread' }, h('span', { class: 'pill' }, '實驗'), h('span', { class: 'muted small' }, '難度 ', stars(l.level))),
       h('h3', { style: { marginTop: '10px' } }, l.title), h('div', { class: 'muted small' }, l.intro.slice(0, 60) + '…'),
       h('div', { class: 'mt' }, APP.done.lab(l.id) ? h('span', { class: 'pill ok' }, '已完成') : h('span', { class: 'pill gray' }, '尚未完成'))))));
   }

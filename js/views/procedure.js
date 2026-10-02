@@ -1,16 +1,16 @@
 /* 流程演練 + SOP 檢查表 */
 (function () {
   const { h, S } = APP, D = APP.data;
-  const stars = (n) => '★'.repeat(n) + '☆'.repeat(3 - n);
+  const stars = (n) => APP.diff(n);
   const typeLabel = { ice: '燃油機車', ev: '電動機車' };
 
   function list(main) {
-    main.append(h('h1', null, '🔧 流程演練'), h('p', { class: 'muted' }, '把一項保養拆成「備料 → 逐步操作」。每一步都有真實新手會犯的錯,選錯會告訴你**為什麼錯、後果是什麼**。完成後可以得到一張**可列印的作業檢查表**,帶去現場用。'));
+    main.append(APP.head('wrench', '流程演練'), h('p', { class: 'muted' }, '把一項保養拆成「備料 → 逐步操作」。每一步都有真實新手會犯的錯,選錯會告訴你**為什麼錯、後果是什麼**。完成後可以得到一張**可列印的作業檢查表**,帶去現場用。'));
     main.append(h('div', { class: 'row mb' }, h('a', { class: 'btn', href: '#/sop' }, '🖨️ 全部作業檢查表(可列印)')));
     main.append(h('div', { class: 'grid auto' }, D.procedures.map((p) => {
       const rec = S.procs[p.id];
       return h('a', { class: 'card', href: '#/proc/' + p.id, style: { margin: 0, textDecoration: 'none', color: 'inherit' } },
-        h('div', { class: 'row spread' }, h('span', { class: 'pill' + (p.type === 'ev' ? ' info' : '') }, typeLabel[p.type]), h('span', { class: 'muted small' }, '難度 ' + stars(p.level))),
+        h('div', { class: 'row spread' }, h('span', { class: 'pill' + (p.type === 'ev' ? ' info' : '') }, typeLabel[p.type]), h('span', { class: 'muted small' }, '難度 ', stars(p.level))),
         h('h3', { style: { marginTop: '10px' } }, p.title), h('div', { class: 'muted small' }, p.intro),
         h('div', { class: 'mt row' }, h('span', { class: 'pill gray' }, '⏱ ' + p.time), h('span', { class: 'pill gray' }, p.steps.length + ' 步'), rec && rec.best != null ? h('span', { class: 'pill ok' }, '最佳 ' + rec.best + '%') : null));
     })));
@@ -117,7 +117,7 @@
   };
 
   APP.views.sop = function (main) {
-    main.append(h('h1', null, '🖨️ 作業檢查表'), h('p', { class: 'muted noprint' }, '所有流程的標準作業步驟。可以直接列印,貼在工作檯旁。'), h('div', { class: 'noprint mb' }, h('button', { class: 'btn primary', onclick: () => window.print() }, '列印 / 存成 PDF')));
+    main.append(APP.head('printer', '作業檢查表'), h('p', { class: 'muted noprint' }, '所有流程的標準作業步驟。可以直接列印,貼在工作檯旁。'), h('div', { class: 'noprint mb' }, h('button', { class: 'btn primary', onclick: () => window.print() }, '列印 / 存成 PDF')));
     D.procedures.forEach((p) => main.append(sopCard(p)));
   };
 })();

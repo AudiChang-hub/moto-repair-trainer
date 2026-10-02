@@ -290,7 +290,7 @@
       res.slice(0, 20).forEach((q) => out.append(h('div', { class: 'card' }, questionCard(bank, lv, q, { reveal: true }))));
     };
     inp.oninput = run;
-    main.append(h('p', null, h('a', { href: '#/cert', onclick: (e) => { e.preventDefault(); APP.views.cert(main, [], true); } }, '← 考照練習')), h('h1', null, '🔎 搜尋題目'), inp, out);
+    main.append(h('p', null, h('a', { href: '#/cert', onclick: (e) => { e.preventDefault(); APP.views.cert(main, [], true); } }, '← 考照練習')), APP.head('search', '搜尋題目'), inp, out);
     inp.focus();
   }
 
@@ -298,7 +298,7 @@
   APP.views.cert = function (main, params, rerender) {
     if (rerender) { main.innerHTML = ''; window.scrollTo(0, 0); }
     const lv = S.certLevel || 'c';
-    main.append(h('h1', null, '🎓 考照練習'), h('p', { class: 'muted' }, '機器腳踏車修護 丙級 / 乙級 技術士學科。官方公開題庫,搭配白話解析,從零開始也能刷。'));
+    main.append(APP.head('graduation-cap', '考照練習'), h('p', { class: 'muted' }, '機器腳踏車修護 丙級 / 乙級 技術士學科。官方公開題庫,搭配白話解析,從零開始也能刷。'));
     const loading = h('p', { class: 'muted' }, '載入題庫中…');
     main.append(loading);
     APP.loadBank(lv).then((bank) => {

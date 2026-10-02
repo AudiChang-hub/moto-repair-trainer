@@ -33,7 +33,7 @@
   ];
 
   APP.views.brands = function (main) {
-    main.append(h('h1', null, '🏷️ 車款專區:SYM · SUZUKI · GOGORO'),
+    main.append(APP.head('tag', '車款專區:SYM · SUZUKI · GOGORO'),
       h('p', { class: 'muted' }, '你家主要做這三個牌子。這一頁的重點只有一個:**同樣是 125 速克達,不同牌子、不同車型,規格真的不一樣**。下面的數字是我從官方手冊「原頁面」實際查到的,拿來示範「查手冊」這個動作——這也正是丙級學科會考的「依廠牌、車型查閱修護手冊規格」。'));
     main.append(h('div', { class: 'callout warn' }, h('div', { class: 'ttl' }, '⚠️ 這些是「特定車型、特定年份」的資料'), h('p', null, '表中數字只代表手冊上標明的那一款(例如 JET S/JET SR 的 FK12 系列、Swish 125 的 UG125DA)。你店裡的車請**一律核對那台車的手冊**,尤其年份、期別(六期/七期)、ABS 版本不同,規格可能不同。')));
 

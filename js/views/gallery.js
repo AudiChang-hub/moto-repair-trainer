@@ -10,7 +10,7 @@
     ['🔋 電動機車與 Gogoro', ['ev-scooter', 'gogoro', 'gogoro-battery', 'li-ion-pack', 'hub-motor', 'ev-controller', 'ev-charger']],
   ];
   APP.views.gallery = function (main) {
-    main.append(h('h1', null, '📷 工具零件圖鑑'), h('p', { class: 'muted', html: APP.rich('不知道某個工具或零件長什麼樣?這裡全是實物照片。**點照片可以放大**。教材、零件地圖、術語閃卡、題庫裡出現的名詞,也都會配上這裡的照片。') }));
+    main.append(APP.head('camera', '工具零件圖鑑'), h('p', { class: 'muted', html: APP.rich('不知道某個工具或零件長什麼樣?這裡全是實物照片。**點照片可以放大**。教材、零件地圖、術語閃卡、題庫裡出現的名詞,也都會配上這裡的照片。') }));
     const inp = h('input', { type: 'search', placeholder: '搜尋:例如 火星塞、卡尺、皮帶', style: { width: '100%', padding: '11px 14px', fontSize: '1rem', border: '1.5px solid var(--border)', borderRadius: '10px', background: 'var(--card)', color: 'var(--text)', marginBottom: '8px' } });
     const box = h('div');
     main.append(inp, box);

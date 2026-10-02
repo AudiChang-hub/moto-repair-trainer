@@ -4,28 +4,28 @@
 
   /* ================= 動畫圖解 ================= */
   const VISUALS = [
-    ['fourstroke', '四行程引擎', '吸、壓、爆、排。拖動曲軸角度,看活塞、氣門與火花的時機。', '🔄'],
-    ['cvt', 'CVT 無段變速', '拉動轉速滑桿,看皮帶如何在兩個盤上變換位置;勾選「普利珠磨損」看症狀怎麼來。', '⚙️'],
-    ['evflow', '電動車能量流', '待機、加速、煞車回充、充電,能量往哪個方向流?', '🔋'],
-    ['nostart', '發不動診斷樹', '最常見客訴「發不動」的判斷流程,一頁看完。', '🌳'],
+    ['fourstroke', '四行程引擎', '吸、壓、爆、排。拖動曲軸角度,看活塞、氣門與火花的時機。', 'cog'],
+    ['cvt', 'CVT 無段變速', '拉動轉速滑桿,看皮帶如何在兩個盤上變換位置;勾選「普利珠磨損」看症狀怎麼來。', 'gauge'],
+    ['evflow', '電動車能量流', '待機、加速、煞車回充、充電,能量往哪個方向流?', 'battery-charging'],
+    ['nostart', '發不動診斷樹', '最常見客訴「發不動」的判斷流程,一頁看完。', 'list-checks'],
   ];
   APP.views.visual = function (main, params) {
     if (params.length && APP.widgets[params[0]]) {
       const v = VISUALS.find((x) => x[0] === params[0]);
-      main.append(h('p', null, h('a', { href: '#/visual' }, '← 動畫圖解')), h('h1', null, v[3] + ' ' + v[1]), h('p', { class: 'muted' }, v[2]));
+      main.append(h('p', null, h('a', { href: '#/visual' }, '← 動畫圖解')), APP.head(v[3], v[1]), h('p', { class: 'muted' }, v[2]));
       APP.widgets[params[0]](main);
       if (APP.markVisual) APP.markVisual(params[0]);
       return;
     }
-    main.append(h('h1', null, '🎞️ 動畫圖解'), h('p', { class: 'muted' }, '文字看不懂的地方,動手拉一拉就懂了。'));
+    main.append(APP.head('film', '動畫圖解'), h('p', { class: 'muted' }, '文字看不懂的地方,動手拉一拉就懂了。'));
     main.append(h('div', { class: 'grid auto' }, VISUALS.map((v) => h('a', { class: 'card', href: '#/visual/' + v[0], style: { margin: 0, textDecoration: 'none', color: 'inherit' } },
-      h('div', { style: { fontSize: '2rem' } }, v[3]), h('h3', { style: { marginTop: '6px' } }, v[1]), h('div', { class: 'muted small' }, v[2])))));
+      h('div', { class: 'ti', style: { width: '48px', height: '48px', borderRadius: '13px', display: 'grid', placeItems: 'center', background: 'var(--accent-soft)', color: 'var(--accent)' } }, APP.icon(v[3], 24)), h('h3', { style: { marginTop: '12px' } }, v[1]), h('div', { class: 'muted small' }, v[2])))));
   };
 
   /* ================= 零件地圖 ================= */
   APP.views.parts = function (main) {
     let mode = 'ice', sel = null;
-    main.append(h('h1', null, '🏍️ 零件地圖'), h('p', { class: 'muted' }, '點圖上的編號圓點,看這個零件「做什麼、壞了會怎樣、怎麼保養、新手能不能碰」。'));
+    main.append(APP.head('bike', '零件地圖'), h('p', { class: 'muted' }, '點圖上的編號圓點,看這個零件「做什麼、壞了會怎樣、怎麼保養、新手能不能碰」。'));
     const box = h('div');
     main.append(box);
     function render() {
@@ -67,7 +67,7 @@
     let cat = '全部';
     const cats = ['全部', ...new Set(D.glossary.map((g) => g.cat))];
     const box = h('div');
-    main.append(h('h1', null, '🃏 術語閃卡'), h('p', { class: 'muted' }, '看到名詞先想「這是什麼?」,再翻面。記得的會隔幾天再出現,忘記的會馬上重來(間隔重複)。'), box);
+    main.append(APP.head('layers', '術語閃卡'), h('p', { class: 'muted' }, '看到名詞先想「這是什麼?」,再翻面。記得的會隔幾天再出現,忘記的會馬上重來(間隔重複)。'), box);
     const total = () => D.glossary.length;
     const known = () => D.glossary.filter((g) => S.cards[g.id] && S.cards[g.id].box >= 3).length;
 
@@ -122,7 +122,7 @@
 
   /* ================= 錯題本 ================= */
   APP.views.mistakes = function (main) {
-    main.append(h('h1', null, '📕 錯題本'), h('p', { class: 'muted' }, '你答錯的測驗題、診斷失誤、流程選錯,都在這裡。**重做答對了就會標記為已解決。**'));
+    main.append(APP.head('notebook-pen', '錯題本'), h('p', { class: 'muted' }, '你答錯的測驗題、診斷失誤、流程選錯,都在這裡。**重做答對了就會標記為已解決。**'));
     const box = h('div');
     main.append(box);
     const labelOf = { quiz: '測驗題', diag: '診斷', proc: '流程', lab: '電表' };
@@ -164,7 +164,7 @@
       cb.onchange = () => { S.bridge[key] = cb.checked; APP.save(); };
       return h('li', { style: { listStyle: 'none', margin: '6px 0' } }, h('label', null, cb, text));
     };
-    main.append(h('h1', null, '🌉 走向實車'), h('p', { class: 'muted' }, '模擬系統不能取代手感。這一頁告訴你:怎麼用最低成本、最安全的方式,把腦中的地圖接到雙手上。'));
+    main.append(APP.head('route', '走向實車'), h('p', { class: 'muted' }, '模擬系統不能取代手感。這一頁告訴你:怎麼用最低成本、最安全的方式,把腦中的地圖接到雙手上。'));
     main.append(sec('1. 這套系統能教你什麼、不能教你什麼',
       h('div', { class: 'grid c2' },
         h('div', null, h('strong', null, '✅ 能教你'), ul(['整體架構與名詞(不會再「一頭霧水」)', '診斷的思考順序與取捨', '標準作業流程與常見錯誤', '電表的檔位、接法、讀數意義', '哪些事該停手、該交給原廠'])),
