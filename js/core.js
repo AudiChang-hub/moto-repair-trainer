@@ -145,6 +145,7 @@
   const NAV = [
     ['home', '🏠', '今日任務'],
     ['learn', '🗺️', '學習地圖'],
+    ['cert', '🎓', '考照練習'],
     ['diagnose', '🔍', '診斷實戰'],
     ['proc', '🔧', '流程演練'],
     ['lab', '⚡', '電表實驗室'],
@@ -159,7 +160,7 @@
     nav.innerHTML = '';
     nav.append(h('div', { class: 'brand' }, h('img', { src: 'assets/icon.png', alt: '', style: { width: '34px', height: '34px', borderRadius: '9px' } }), '機車維修訓練場'));
     NAV.forEach(([id, ico, label]) => nav.append(h('a', { class: 'nav-item', href: '#/' + id, 'data-id': id }, h('span', { class: 'nav-ico' }, ico), label)));
-    nav.append(h('div', { class: 'nav-foot' }, '進度存在這台電腦的瀏覽器裡。', h('br'), h('a', { href: '#', onclick: (e) => { e.preventDefault(); APP.resetAll(); } }, '清除全部進度')));
+    nav.append(h('div', { class: 'nav-foot' }, '進度存在這台電腦的瀏覽器裡。', h('br'), h('a', { href: '#/backup' }, '📦 備份 / 換裝置'), h('br'), h('a', { href: '#', onclick: (e) => { e.preventDefault(); APP.resetAll(); } }, '清除全部進度')));
   }
 
   function route() {
@@ -184,5 +185,6 @@
     buildNav();
     window.addEventListener('hashchange', route);
     route();
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
   };
 })();

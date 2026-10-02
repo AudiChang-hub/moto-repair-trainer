@@ -38,4 +38,19 @@ D.labs.forEach(l=>{
 // plan
 D.plan.forEach(d=>d.tasks.forEach(t=>{ if(t.k==='lesson'&&!lessonIds.has(t.id)) err('plan lesson '+t.id); if(t.k==='sc'&&!sids.has(t.id)) err('plan sc '+t.id); if(t.k==='proc'&&!D.procedures.find(p=>p.id===t.id)) err('plan proc '+t.id); if(t.k==='lab'&&!D.labs.find(p=>p.id===t.id)) err('plan lab '+t.id); if(t.k==='visual'&&!widgets.includes(t.id)) err('plan visual '+t.id);}));
 console.log('lessons',D.lessons.length,'quiz Qs',D.lessons.reduce((a,l)=>a+l.quiz.length,0),'scenarios',D.scenarios.length,'procs',D.procedures.length,'labs',D.labs.length,'glossary',D.glossary.length,'parts',D.parts.length);
+// 考照題庫
+const fsx=require('fs');
+for (const lv of ['c','b']) {
+  const f=path.join(__dirname,'js','data','bank-'+lv+'.js');
+  if(!fsx.existsSync(f)) { err('missing bank-'+lv); continue; }
+  delete global.window; global.window=global; eval(fsx.readFileSync(f,'utf8'));
+  const B=global['BANK_'+lv.toUpperCase()]; const ids=new Set();
+  B.q.forEach(q=>{ if(ids.has(q.id)) err('dup '+q.id); ids.add(q.id);
+    if(!/^[1-4]{1,4}$/.test(String(q.ans))) err('ans '+q.id);
+    if(!(q.opts.length===4||q.optsInFig)) err('opts '+q.id);
+    if(!q.stem||!q.exp) err('text '+q.id);
+    (q.imgs||[]).forEach(i=>{ if(!fsx.existsSync(path.join(__dirname,'assets','bank',lv,i))) err('img '+q.id+' '+i); }); });
+  B.sections.forEach(s=>{ if(!B.q.some(q=>q.sec===s.sec)) err('empty section '+lv+s.sec); });
+  console.log('bank',lv,B.q.length,'題, 章',B.sections.length,', 複選',B.q.filter(q=>String(q.ans).length>1).length,', 圖題',B.q.filter(q=>q.imgs).length,', 解析待確認',B.q.filter(q=>q.u).length);
+}
 console.log(errs.length?('ERRORS:\n'+errs.join('\n')):'ALL CHECKS PASSED');
